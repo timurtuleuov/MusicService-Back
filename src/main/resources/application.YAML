@@ -1,0 +1,20 @@
+spring:
+  data:
+    rest:
+      enabled: false
+  jpa:
+    database: POSTGRESQL
+    hibernate:
+      ddl-auto: update
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/music
+    username: core
+    password: 12345678
+    driverClassName: org.postgresql.Driver
+hibernate:
+  type:
+    wrapper_array_handling: ALLOW
+security:
+  basic:
+    enabled: false
