@@ -4,6 +4,7 @@ import com.timur.spotify.entity.Album;
 import com.timur.spotify.entity.GenreType;
 import com.timur.spotify.entity.Track;
 import com.timur.spotify.service.AlbumService;
+import com.timur.spotify.service.FileStorageService;
 import com.timur.spotify.service.TrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,8 @@ public class TrackController {
     private TrackService trackService;
     @Autowired
     private AlbumService albumService;
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @GetMapping
     public ResponseEntity<List<Track>> getAllTracks() {
@@ -44,10 +47,11 @@ public class TrackController {
         Optional<Album> albumOptional = albumService.getAlbumById(albumId);
         Album album = albumOptional.get();
         Track newTrack = new Track();
-        newTrack.setAlbums((List<Album>) album);
+        newTrack.setAlbum(album);
         newTrack.setName(name);
         newTrack.setGenre(GenreType.valueOf(genre));
-        newTrack.setAudio(audio.getBytes());
+        String filePath = fileStorageService.saveFile(audio);
+        newTrack.setAudioPath(filePath);
         Track createdTrack = trackService.createTrack(newTrack);
         return new ResponseEntity<>(createdTrack, HttpStatus.CREATED);
     }

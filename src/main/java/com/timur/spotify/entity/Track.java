@@ -18,11 +18,11 @@ public class Track {
     private GenreType genre;
     @Lob
     private String audioPath;
-    @ManyToMany
+    @ManyToOne
     @JoinTable(
             name = "track_album",
             joinColumns = @JoinColumn(name = "track_id"),
             inverseJoinColumns = @JoinColumn(name = "album_id")
     )
-    private List<Album> albums;
+    private Album album;
 }
