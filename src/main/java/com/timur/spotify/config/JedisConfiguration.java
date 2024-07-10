@@ -1,7 +1,6 @@
 package com.timur.spotify.config;
 
-import com.timur.spotify.repository.redis.MessagePublisher;
-import com.timur.spotify.service.redis.MessagePublisherImpl;
+
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -4,11 +4,12 @@ import io.lettuce.core.dynamic.annotation.CommandNaming;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @Entity
-public class Track {
+public class Track implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

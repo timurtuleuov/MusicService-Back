@@ -104,9 +104,12 @@ public class TrackController {
     // Получение трека по ID
     @GetMapping("/{id}")
     public ResponseEntity<Track> getTrackById(@PathVariable Long id) {
-        Optional<Track> track = trackService.getTrackById(id);
-        return track.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        Track track = trackService.getTrackById(id);
+        if (track != null) {
+            return new ResponseEntity<>(track, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     // Создание нового трека
