@@ -36,6 +36,9 @@ dependencies  {
 	//Sfl4j for logging
 	implementation 'org.slf4j:slf4j-api:2.0.13'
 
+	//Resilience4j for fault tolerance
+	implementation 'io.github.resilience4j:resilience4j-spring-boot2:2.2.0'
+
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
