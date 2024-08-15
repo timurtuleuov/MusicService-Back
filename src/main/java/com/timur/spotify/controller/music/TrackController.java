@@ -1,11 +1,11 @@
-package com.timur.spotify.controller;
+package com.timur.spotify.controller.music;
 
-import com.timur.spotify.entity.Album;
-import com.timur.spotify.entity.GenreType;
-import com.timur.spotify.entity.Track;
-import com.timur.spotify.service.AlbumService;
-import com.timur.spotify.service.FileStorageService;
-import com.timur.spotify.service.TrackService;
+import com.timur.spotify.entity.music.Album;
+import com.timur.spotify.entity.music.GenreType;
+import com.timur.spotify.entity.music.Track;
+import com.timur.spotify.service.music.AlbumService;
+import com.timur.spotify.service.music.FileStorageService;
+import com.timur.spotify.service.music.TrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;

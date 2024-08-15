@@ -1,4 +1,4 @@
-package com.timur.spotify.entity;
+package com.timur.spotify.entity.music;
 
 public enum GenreType {
     ROCK,

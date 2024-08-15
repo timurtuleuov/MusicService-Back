@@ -1,7 +1,7 @@
-package com.timur.spotify.controller;
+package com.timur.spotify.controller.music;
 
-import com.timur.spotify.entity.Artist;
-import com.timur.spotify.service.ArtistService;
+import com.timur.spotify.entity.music.Artist;
+import com.timur.spotify.service.music.ArtistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

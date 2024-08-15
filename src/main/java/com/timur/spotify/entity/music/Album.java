@@ -1,19 +1,20 @@
-package com.timur.spotify.entity;
+package com.timur.spotify.entity.music;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @Entity
-public class Artist implements Serializable {
+public class Album implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @Column(nullable = true)
-    private byte[] avatar;
+    private byte[] cover;
 
+    @ManyToOne
+    @JoinColumn(name = "artist_id")
+    private Artist artist;
 }

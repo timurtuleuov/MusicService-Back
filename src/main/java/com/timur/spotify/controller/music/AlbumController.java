@@ -1,8 +1,8 @@
-package com.timur.spotify.controller;
-import com.timur.spotify.entity.Album;
-import com.timur.spotify.entity.Artist;
-import com.timur.spotify.service.AlbumService;
-import com.timur.spotify.service.ArtistService;
+package com.timur.spotify.controller.music;
+import com.timur.spotify.entity.music.Album;
+import com.timur.spotify.entity.music.Artist;
+import com.timur.spotify.service.music.AlbumService;
+import com.timur.spotify.service.music.ArtistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +24,7 @@ public class AlbumController {
     // Получение всех альбомов
     @GetMapping
     public ResponseEntity<List<Album>> getAllAlbums() {
+
         List<Album> albums = albumService.getAllAlbums();
         return new ResponseEntity<>(albums, HttpStatus.OK);
     }

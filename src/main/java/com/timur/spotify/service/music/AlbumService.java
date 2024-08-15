@@ -1,7 +1,7 @@
-package com.timur.spotify.service;
+package com.timur.spotify.service.music;
 
-import com.timur.spotify.entity.Album;
-import com.timur.spotify.repository.AlbumRepository;
+import com.timur.spotify.entity.music.Album;
+import com.timur.spotify.repository.music.AlbumRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

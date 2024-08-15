@@ -1,11 +1,9 @@
-package com.timur.spotify.entity;
+package com.timur.spotify.entity.music;
 
-import io.lettuce.core.dynamic.annotation.CommandNaming;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @Entity
