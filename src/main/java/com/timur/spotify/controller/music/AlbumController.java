@@ -88,7 +88,7 @@ public class AlbumController {
     // Обновление альбома
     @PutMapping("/{id}")
     public ResponseEntity<Album> updateAlbum(@PathVariable Long id, @RequestBody Album updatedAlbum) {
-        logger.info("OPERATION: Updating album");
+        logger.info("OPERATION: Updating album with id {}", id);
         Album album = albumService.updateAlbum(id, updatedAlbum);
         if (album != null) {
             logger.info("SUCCESS: Updated album");
@@ -105,12 +105,12 @@ public class AlbumController {
         logger.info("OPERATION: Deleting album");
         boolean deleted = albumService.deleteAlbum(id);
         if (deleted) {
-            logger.info("SUCCESS: Deleted album");
+            logger.info("SUCCESS: Deleted album by id {}", id);
             return ResponseEntity
                     .status(HttpStatus.NO_CONTENT)
                     .body("Album deleted successfully. Response code: " + HttpStatus.NO_CONTENT.value());
         } else {
-            logger.error("ERROR: Album not found");
+            logger.error("ERROR: Album not found by id {}", id);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body("Album not found. Response code: " + HttpStatus.NOT_FOUND.value());
