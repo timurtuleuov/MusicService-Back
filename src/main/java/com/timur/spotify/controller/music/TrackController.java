@@ -6,6 +6,8 @@ import com.timur.spotify.entity.music.Track;
 import com.timur.spotify.service.music.AlbumService;
 import com.timur.spotify.service.music.FileStorageService;
 import com.timur.spotify.service.music.TrackService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -28,6 +30,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/track")
 public class TrackController {
+    private static final Logger logger = LoggerFactory.getLogger(AlbumController.class);
+
     @Autowired
     private TrackService trackService;
     @Autowired
@@ -44,9 +48,11 @@ public class TrackController {
     //  Контроллер для воспроизведения аудио
     @GetMapping("/audio/{fileName:.+}")
     public ResponseEntity<ByteArrayResource> getAudioFile(@PathVariable String fileName) throws IOException {
+        logger.info("OPERATION: Getting audio of track by name {}", fileName);
         File file = new File("D:\\IT\\SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
 
         if (!file.exists()) {
+            logger.error("FAIL: Audio file with name {} doens't exist", fileName);
             return ResponseEntity.notFound().build();
         }
 
@@ -69,11 +75,14 @@ public class TrackController {
                         rangeEnd = Long.parseLong(ranges[1]);
                     }
                 } catch (NumberFormatException e) {
+                    logger.error("FAIL: Failed to parse range header for file {}. Bad request format: {}", fileName, rangeHeader);
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
                 }
             }
 
             if (rangeStart > rangeEnd || rangeEnd >= fileLength) {
+                logger.error("FAIL: Invalid range request for file {}. Requested range: {}-{}, File length: {}",
+                        fileName, rangeStart, rangeEnd, fileLength);
                 return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
                         .header(HttpHeaders.CONTENT_RANGE, "bytes */" + fileLength)
                         .build();
@@ -88,7 +97,7 @@ public class TrackController {
                 inputStream.skip(rangeStart);
 
             }
-
+            logger.info("SUCCESS: Successfully processed partial content request for file {}", fileName);
             return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                     .headers(headers)
                     .body(new ByteArrayResource(data));
@@ -96,6 +105,7 @@ public class TrackController {
             byte[] data = Files.readAllBytes(file.toPath());
             headers.setContentLength(fileLength);
 
+            logger.info("SUCCESS: Successfully processed full content request for file {}", fileName);
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(new ByteArrayResource(data));
@@ -104,10 +114,13 @@ public class TrackController {
     // Получение трека по ID
     @GetMapping("/{id}")
     public ResponseEntity<Track> getTrackById(@PathVariable Long id) {
+        logger.info("OPERATION: Getting track by id {}", id);
         Track track = trackService.getTrackById(id);
         if (track != null) {
+            logger.info("SUCCESS: Track found");
             return new ResponseEntity<>(track, HttpStatus.OK);
         } else {
+            logger.info("FAIL: Track not found");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -116,6 +129,8 @@ public class TrackController {
     @PostMapping
     public ResponseEntity<Track> createTrack(@RequestParam("name") String name, @RequestParam("albumId") Long albumId, @RequestParam("genre") String genre,
                                              @RequestParam("audio") MultipartFile audio) throws IOException {
+        logger.info("OPERATION: Creating track with name {}, album ID {} and genre {}",
+                name, albumId, genre);
         Optional<Album> albumOptional = albumService.getAlbumById(albumId);
         Album album = albumOptional.get();
         Track newTrack = new Track();
@@ -125,16 +140,20 @@ public class TrackController {
         String filePath = fileStorageService.saveFile(audio);
         newTrack.setAudioPath(filePath);
         Track createdTrack = trackService.createTrack(newTrack);
+        logger.info("SUCCESS: Created track with name {}", name);
         return new ResponseEntity<>(createdTrack, HttpStatus.CREATED);
     }
 
     // Обновление трека
     @PutMapping("/{id}")
     public ResponseEntity<Track> updateTrack(@PathVariable Long id, @RequestBody Track updatedTrack) {
+        logger.info("OPERATION: Updating track with id {}", id);
         Track track = trackService.updateTrack(id, updatedTrack);
         if (track != null) {
+            logger.info("SUCCESS: Updated track");
             return new ResponseEntity<>(track, HttpStatus.OK);
         } else {
+            logger.error("ERROR: Track not found");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -142,10 +161,13 @@ public class TrackController {
     // Удаление трека по ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTrack(@PathVariable Long id) {
+        logger.info("OPERATION: Deleting track");
         boolean deleted = trackService.deleteTrack(id);
         if (deleted) {
+            logger.info("SUCCESS: Deleted track by id {}", id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
+            logger.error("ERROR: Track not found by id {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
