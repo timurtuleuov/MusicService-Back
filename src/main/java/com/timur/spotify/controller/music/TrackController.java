@@ -127,7 +127,8 @@ public class TrackController {
 
     // Создание нового трека
     @PostMapping
-    public ResponseEntity<Track> createTrack(@RequestParam("name") String name, @RequestParam("albumId") Long albumId, @RequestParam("genre") String genre,
+    public ResponseEntity<Track> createTrack(@RequestParam("name") String name, @RequestParam("albumId")
+                                             Long albumId, @RequestParam("genre") String genre,
                                              @RequestParam("audio") MultipartFile audio) throws IOException {
         logger.info("OPERATION: Creating track with name {}, album ID {} and genre {}",
                 name, albumId, genre);
