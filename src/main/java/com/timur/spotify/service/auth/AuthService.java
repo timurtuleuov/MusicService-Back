@@ -1,6 +1,8 @@
 package com.timur.spotify.service.auth;
 
 import com.timur.spotify.dto.JwtAuthenticationResponse;
+import com.timur.spotify.dto.SignInRequest;
+import com.timur.spotify.dto.SignUpRequest;
 import com.timur.spotify.entity.auth.Role;
 import com.timur.spotify.entity.auth.User;
 import org.springframework.security.authentication.AuthenticationManager;
