@@ -29,7 +29,7 @@ public class AuthController {
     public JwtAuthenticationResponse signUp(@RequestBody @Valid SignUpRequest request) {
         logger.info("OPERATION: User {} signing up", request.getUsername());
         JwtAuthenticationResponse response = authService.signUp(request);
-        this.kafkaProducer.sendMessage("auth-topic", "User signed up: " + request.getUsername());
+//        this.kafkaProducer.sendMessage("auth-topic", "User signed up: " + request.getUsername());
         return response;
     }
 
@@ -37,7 +37,7 @@ public class AuthController {
     public JwtAuthenticationResponse signIn(@RequestBody @Valid SignInRequest request) {
         logger.info("OPERATION: User {} signing in", request.getUsername());
         JwtAuthenticationResponse response = authService.signIn(request);
-        this.kafkaProducer.sendMessage("auth-topic", "User signed in: " + request.getUsername());
+//        this.kafkaProducer.sendMessage("auth-topic", "User signed in: " + request.getUsername());
         return response;
     }
 }
