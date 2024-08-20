@@ -1,5 +1,7 @@
 package com.timur.spotify.entity.auth;
 
 
-public class Role {
+public enum Role {
+    ROLE_USER,
+    ROLE_ADMIN
 }
