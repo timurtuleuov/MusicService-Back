@@ -52,6 +52,7 @@ dependencies  {
 
 	implementation 'org.springframework.kafka:spring-kafka'
 
+
 	compileOnly 'org.projectlombok:lombok'
 
 	runtimeOnly 'org.postgresql:postgresql'
