@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface LikeRepository extends JpaRepository<Like, Long> {
     Optional<Like> findByUserAndTrack(User user, Track track);
     long countByTrack(Track post);
-    void deleteByUserAndPost(User user, Track track);
+    void deleteByUserAndTrack(User user, Track track);
 }
