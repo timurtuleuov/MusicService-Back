@@ -27,5 +27,8 @@ public class LikeService {
         Like like = new Like(user, track);
         return likeRepository.save(like);
     }
+    public void unlikeTrack(User user, Track track) {
+        likeRepository.deleteByUserAndTrack(user, track);
+    }
 
 }
