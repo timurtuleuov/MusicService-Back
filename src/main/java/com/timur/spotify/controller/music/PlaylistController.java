@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/playlist")
 public class PlaylistController {
@@ -20,12 +22,22 @@ public class PlaylistController {
         Playlist createdPlaylist = playlistService.createPlaylist(playlist);
         return new ResponseEntity<>(createdPlaylist, HttpStatus.CREATED);
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<Playlist> getPlaylistById(@PathVariable Long id) {
         Playlist playlist = playlistService.getById(id);
         if (playlist != null) {
             return new ResponseEntity<>(playlist, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/author/{authorId}")
+    public ResponseEntity<List<Playlist>> getAllPlaylistsByAuthorId(@PathVariable Long authorId) {
+        List<Playlist> playlists = playlistService.getAllPlaylistByAuthorId(authorId);
+        if (!playlists.isEmpty()) {
+            return new ResponseEntity<>(playlists, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
