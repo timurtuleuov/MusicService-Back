@@ -31,4 +31,7 @@ public class LikeService {
         likeRepository.deleteByUserAndTrack(user, track);
     }
 
+    public long countLikes(Track track) {
+        return likeRepository.countByTrack(track);
+    }
 }
