@@ -42,4 +42,14 @@ public class PlaylistController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Playlist> updatePlaylist(@PathVariable Long id, @RequestBody Playlist playlist) {
+        Playlist updatedPlaylist = playlistService.updatePlaylist(id, playlist);
+        if (updatedPlaylist != null) {
+            return new ResponseEntity<>(updatedPlaylist, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }
