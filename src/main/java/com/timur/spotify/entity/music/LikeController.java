@@ -36,4 +36,11 @@ public class LikeController {
         likeService.unlikeTrack(user, track);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    
+    @GetMapping("/count")
+    public ResponseEntity<Long> getLikeCount(@PathVariable Long trackId) {
+        Track track = trackService.getTrackById(trackId);
+        long likeCount = likeService.countLikes(track);
+        return new ResponseEntity<>(likeCount, HttpStatus.OK);
+    }
 }
