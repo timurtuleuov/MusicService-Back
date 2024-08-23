@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "like_type", discriminatorType = DiscriminatorType.STRING)
 public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +30,8 @@ public class Like {
 
     private LocalDateTime likedAt;
 
-    public Like(User user, Track track) {
+    public Like(User user) {
+        this.user = user;
+        this.likedAt = LocalDateTime.now();
     }
 }
