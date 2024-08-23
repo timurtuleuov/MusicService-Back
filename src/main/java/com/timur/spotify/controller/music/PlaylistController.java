@@ -56,20 +56,26 @@ public class PlaylistController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Playlist> updatePlaylist(@PathVariable Long id, @RequestBody Playlist playlist) {
+        logger.info("OPERATION: Updating playlist with id {} and name {}", id, playlist.getName());
         Playlist updatedPlaylist = playlistService.updatePlaylist(id, playlist);
         if (updatedPlaylist != null) {
+            logger.info("SUCCESS: Updated playlist with id {}", id);
             return new ResponseEntity<>(updatedPlaylist, HttpStatus.OK);
         } else {
+            logger.info("FAIL: Not found playlist with id {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
+        
         boolean isDeleted = playlistService.deletePlaylist(id);
         if (isDeleted) {
+            logger.info("SUCCESS: Deleted playlist with id {}", id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
+            logger.info("FAIL: Not found playlist with id {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
