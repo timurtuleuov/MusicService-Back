@@ -36,17 +36,20 @@ public class PlaylistController {
             logger.info("SUCCESS: Found playlist with id {}", id);
             return new ResponseEntity<>(playlist, HttpStatus.OK);
         } else {
-            logger.error("ERROR: Not found playlist with id {}", id);
+            logger.error("FAIL: Not found playlist with id {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping("/author/{authorId}")
     public ResponseEntity<List<Playlist>> getAllPlaylistsByAuthorId(@PathVariable Long authorId) {
+        logger.info("OPERATION: Getting playlist by author id {}", authorId);
         List<Playlist> playlists = playlistService.getAllPlaylistByAuthorId(authorId);
         if (!playlists.isEmpty()) {
+            logger.info("SUCCESS: Found playlist by author id {}", authorId);
             return new ResponseEntity<>(playlists, HttpStatus.OK);
         } else {
+            logger.info("SUCCESS: Not found playlist by author id {}", authorId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
