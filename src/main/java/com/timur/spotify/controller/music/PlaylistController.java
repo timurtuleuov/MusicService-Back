@@ -33,7 +33,7 @@ public class PlaylistController {
         logger.info("OPERATION: Getting playlist with id {}", id);
         Playlist playlist = playlistService.getById(id);
         if (playlist != null) {
-            
+            logger.info("SUCCESS: Found playlist with id {}, id");
             return new ResponseEntity<>(playlist, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
