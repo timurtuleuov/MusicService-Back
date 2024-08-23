@@ -2,6 +2,8 @@ package com.timur.spotify.controller.music;
 
 import com.timur.spotify.entity.music.Playlist;
 import com.timur.spotify.service.music.PlaylistService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +13,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/playlist")
 public class PlaylistController {
+    private static final Logger logger = LoggerFactory.getLogger(PlaylistController.class);
+
     private final PlaylistService playlistService;
 
     public PlaylistController(PlaylistService playlistService) {
@@ -19,14 +23,17 @@ public class PlaylistController {
 
     @PostMapping
     public ResponseEntity<Playlist> createPlaylist(@RequestBody Playlist playlist) {
+        logger.info("OPERATION: Creating playlist with name {} by author", playlist.getName(), playlist.getAuthor().getUsername());
         Playlist createdPlaylist = playlistService.createPlaylist(playlist);
         return new ResponseEntity<>(createdPlaylist, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Playlist> getPlaylistById(@PathVariable Long id) {
+        logger.info("OPERATION: Getting playlist with id {}", id);
         Playlist playlist = playlistService.getById(id);
         if (playlist != null) {
+            
             return new ResponseEntity<>(playlist, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
