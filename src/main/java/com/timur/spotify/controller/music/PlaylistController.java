@@ -69,7 +69,7 @@ public class PlaylistController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
-        
+        logger.info("OPERATION: Deleting playlist with id {}", id);
         boolean isDeleted = playlistService.deletePlaylist(id);
         if (isDeleted) {
             logger.info("SUCCESS: Deleted playlist with id {}", id);
