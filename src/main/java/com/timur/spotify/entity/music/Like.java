@@ -15,14 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "like_type", discriminatorType = DiscriminatorType.STRING)
-public class Like {
+public abstract  class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "track_id", nullable = false)
-    private Track track;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
