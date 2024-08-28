@@ -8,19 +8,20 @@ import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
-@DiscriminatorValue("TRACK")
-public class TrackLike extends Like{
+@DiscriminatorValue("ALBUM")
+public class AlbumLike extends Like {
+
     @ManyToOne
-    @JoinColumn(name = "track_id", nullable = false)
-    private Track track;
+    @JoinColumn(name = "album_id", nullable = false)
+    private Album album;
 
-    public TrackLike() {}
+    AlbumLike(){}
 
-    public TrackLike(User user, Track track) {
+    AlbumLike(User user, Album album) {
         super(user);
-        this.track = track;
+        this. album = album;
     }
 }
