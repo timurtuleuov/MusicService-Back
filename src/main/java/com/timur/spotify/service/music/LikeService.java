@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Service
 public class LikeService {
-    private final LikeRepository likeRepository;
+    private final TrackLikeRepository likeRepository;
 
     public LikeService(LikeRepository likeRepository) {
         this.likeRepository = likeRepository;
