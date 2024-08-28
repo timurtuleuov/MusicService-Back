@@ -24,6 +24,8 @@ public abstract  class Like {
 
     private LocalDateTime likedAt;
 
+    public Like() {}
+
     public Like(User user) {
         this.user = user;
         this.likedAt = LocalDateTime.now();

@@ -24,4 +24,5 @@ public class Track implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "album_id")
     )
     private Album album;
+
 }
