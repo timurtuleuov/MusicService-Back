@@ -10,11 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "like_type", discriminatorType = DiscriminatorType.STRING)
+@MappedSuperclass
 public abstract  class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
