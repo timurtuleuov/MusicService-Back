@@ -1,11 +1,15 @@
 package com.timur.spotify.controller.music;
+import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.music.Album;
 import com.timur.spotify.entity.music.Artist;
+import com.timur.spotify.service.auth.UserService;
+import com.timur.spotify.service.music.AlbumLikeService;
 import com.timur.spotify.service.music.AlbumService;
 import com.timur.spotify.service.music.ArtistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -114,6 +118,42 @@ public class AlbumController {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body("Album not found. Response code: " + HttpStatus.NOT_FOUND.value());
+        }
+    }
+
+    @RestController
+    @RequestMapping("/albums/{albumId}/likes")
+    public static class AlbumLikeController {
+
+        private final AlbumLikeService likeService;
+        private final AlbumService albumService;
+        private final UserService userService;
+
+        public AlbumLikeController(AlbumLikeService likeService, AlbumService albumService, UserService userService) {
+            this.likeService = likeService;
+            this.albumService = albumService;
+            this.userService = userService;
+        }
+
+        @PostMapping
+        public ResponseEntity<Void> likeAlbum(@PathVariable Long albumId, @AuthenticationPrincipal User user) {
+            Album album = albumService.getAlbumById(albumId).get();
+            likeService.likeAlbum(user, album);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }
+
+        @DeleteMapping
+        public ResponseEntity<Void> unlikeAlbum(@PathVariable Long albumId, @AuthenticationPrincipal User user) {
+            Album album = albumService.getAlbumById(albumId).get();
+            likeService.unlikeAlbum(user, album);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        @GetMapping("/count")
+        public ResponseEntity<Long> getLikeCount(@PathVariable Long albumId) {
+            Album album = albumService.getAlbumById(albumId).get();
+            long likeCount = likeService.countLikes(album);
+            return new ResponseEntity<>(likeCount, HttpStatus.OK);
         }
     }
 }

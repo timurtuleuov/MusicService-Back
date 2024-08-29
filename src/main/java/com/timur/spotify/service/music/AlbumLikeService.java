@@ -15,7 +15,7 @@ public class AlbumLikeService {
         this.albumLikeRepository = albumLikeRepository;
     }
 
-    public Like likeTrack(User user, Album album) {
+    public Like likeAlbum(User user, Album album) {
         // Проверяем, поставил ли пользователь уже лайк этому треку
         Optional<Like> existingLike = albumLikeRepository.findByUserAndAlbum(user, album);
         if (existingLike.isPresent()) {
@@ -26,7 +26,7 @@ public class AlbumLikeService {
         AlbumLike like = new AlbumLike(user, album);
         return albumLikeRepository.save(like);
     }
-    public void unlikeTrack(User user, Album album) {
+    public void unlikeAlbum(User user, Album album) {
         albumLikeRepository.deleteByUserAndAlbum(user, album);
     }
 
