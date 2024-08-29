@@ -137,23 +137,35 @@ public class AlbumController {
 
         @PostMapping
         public ResponseEntity<Void> likeAlbum(@PathVariable Long albumId, @AuthenticationPrincipal User user) {
-            Album album = albumService.getAlbumById(albumId).get();
-            likeService.likeAlbum(user, album);
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            Optional<Album> albumOptional = albumService.getAlbumById(albumId);
+            if (albumOptional.isPresent()) {
+                likeService.likeAlbum(user, albumOptional.get());
+                return new ResponseEntity<>(HttpStatus.CREATED);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Альбом не найден
+            }
         }
 
         @DeleteMapping
         public ResponseEntity<Void> unlikeAlbum(@PathVariable Long albumId, @AuthenticationPrincipal User user) {
-            Album album = albumService.getAlbumById(albumId).get();
-            likeService.unlikeAlbum(user, album);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            Optional<Album> albumOptional = albumService.getAlbumById(albumId);
+            if (albumOptional.isPresent()) {
+                likeService.unlikeAlbum(user, albumOptional.get());
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Альбом не найден
+            }
         }
 
         @GetMapping("/count")
         public ResponseEntity<Long> getLikeCount(@PathVariable Long albumId) {
-            Album album = albumService.getAlbumById(albumId).get();
-            long likeCount = likeService.countLikes(album);
-            return new ResponseEntity<>(likeCount, HttpStatus.OK);
+            Optional<Album> albumOptional = albumService.getAlbumById(albumId);
+            if (albumOptional.isPresent()) {
+                long likeCount = likeService.countLikes(albumOptional.get());
+                return new ResponseEntity<>(likeCount, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Альбом не найден
+            }
         }
     }
 }
