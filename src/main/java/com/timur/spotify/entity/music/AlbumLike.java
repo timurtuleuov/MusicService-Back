@@ -20,7 +20,7 @@ public class AlbumLike extends Like {
 
     AlbumLike(){}
 
-    AlbumLike(User user, Album album) {
+    public AlbumLike(User user, Album album) {
         super(user);
         this. album = album;
     }
