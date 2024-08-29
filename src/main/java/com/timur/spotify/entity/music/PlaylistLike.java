@@ -20,7 +20,7 @@ public class PlaylistLike extends Like{
 
     PlaylistLike(){}
 
-    PlaylistLike(User user, Playlist playlist){
+    public PlaylistLike(User user, Playlist playlist){
         super(user);
         this.playlist = playlist;
     }
