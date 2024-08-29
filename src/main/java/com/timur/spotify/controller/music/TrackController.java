@@ -7,7 +7,7 @@ import com.timur.spotify.entity.music.Track;
 import com.timur.spotify.service.auth.UserService;
 import com.timur.spotify.service.music.AlbumService;
 import com.timur.spotify.service.music.FileStorageService;
-import com.timur.spotify.service.music.LikeService;
+import com.timur.spotify.service.music.TrackLikeService;
 import com.timur.spotify.service.music.TrackService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,13 +179,13 @@ public class TrackController {
 
     @RestController
     @RequestMapping("/tracks/{trackId}/likes")
-    public static class LikeController {
+    public static class TrackLikeController {
 
-        private final LikeService likeService;
+        private final TrackLikeService likeService;
         private final TrackService trackService;
         private final UserService userService;
 
-        public LikeController(LikeService likeService, TrackService trackService, UserService userService) {
+        public TrackLikeController(TrackLikeService likeService, TrackService trackService, UserService userService) {
             this.likeService = likeService;
             this.trackService = trackService;
             this.userService = userService;

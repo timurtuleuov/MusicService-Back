@@ -3,16 +3,18 @@ package com.timur.spotify.service.music;
 import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.music.Like;
 import com.timur.spotify.entity.music.Track;
-import com.timur.spotify.repository.music.LikeRepository;
+
+import com.timur.spotify.entity.music.TrackLike;
+import com.timur.spotify.repository.music.TrackLikeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class LikeService {
+public class TrackLikeService {
     private final TrackLikeRepository likeRepository;
 
-    public LikeService(LikeRepository likeRepository) {
+    public TrackLikeService(TrackLikeRepository likeRepository) {
         this.likeRepository = likeRepository;
     }
 
@@ -24,7 +26,7 @@ public class LikeService {
         }
 
         // Если нет, создаем новый лайк
-        Like like = new Like(user, track);
+        TrackLike like = new TrackLike(user, track);
         return likeRepository.save(like);
     }
     public void unlikeTrack(User user, Track track) {
