@@ -1,6 +1,7 @@
 package com.timur.spotify.repository.music;
 
 import com.timur.spotify.entity.auth.User;
+import com.timur.spotify.entity.music.Album;
 import com.timur.spotify.entity.music.AlbumLike;
 import com.timur.spotify.entity.music.Like;
 import com.timur.spotify.entity.music.Track;
@@ -11,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface AlbumLikeRepository extends JpaRepository<AlbumLike, Long> {
-    Optional<Like> findByUserAndTrack(User user, Track track);
-    long countByTrack(Track post);
-    void deleteByUserAndTrack(User user, Track track);
+    Optional<Like> findByUserAndAlbum(User user, Album album);
+    long countByAlbum(Album album);
+    void deleteByUserAndAlbum(User user, Album album);
 }
