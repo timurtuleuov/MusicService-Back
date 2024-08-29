@@ -20,7 +20,7 @@ public class PlaylistLikeService {
         this.likeRepository = likeRepository;
     }
 
-    public Like likeTrack(User user, Playlist playlist) {
+    public Like likePlaylist(User user, Playlist playlist) {
         // Проверяем, поставил ли пользователь уже лайк этому треку
         Optional<Like> existingLike = likeRepository.findByUserAndPlaylist(user, playlist);
         if (existingLike.isPresent()) {
@@ -31,7 +31,7 @@ public class PlaylistLikeService {
         PlaylistLike like = new PlaylistLike(user, playlist);
         return likeRepository.save(like);
     }
-    public void unlikeTrack(User user, Playlist playlist) {
+    public void unlikePlaylist(User user, Playlist playlist) {
         likeRepository.deleteByUserAndPlaylist(user, playlist);
     }
 

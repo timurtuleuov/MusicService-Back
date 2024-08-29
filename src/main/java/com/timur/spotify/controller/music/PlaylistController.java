@@ -1,11 +1,15 @@
 package com.timur.spotify.controller.music;
 
+import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.music.Playlist;
+import com.timur.spotify.service.auth.UserService;
+import com.timur.spotify.service.music.PlaylistLikeService;
 import com.timur.spotify.service.music.PlaylistService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -79,4 +83,41 @@ public class PlaylistController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @RestController
+    @RequestMapping("/playlists/{playlistId}/likes")
+    public static class PlaylistLikeController {
+
+        private final PlaylistLikeService likeService;
+        private final PlaylistService playlistService;
+        private final UserService userService;
+
+        public PlaylistLikeController(PlaylistLikeService likeService, PlaylistService playlistService, UserService userService) {
+            this.likeService = likeService;
+            this.playlistService = playlistService;
+            this.userService = userService;
+        }
+
+        @PostMapping
+        public ResponseEntity<Void> likePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal User user) {
+            Playlist playlist = playlistService.getById(playlistId);
+            likeService.likePlaylist(user, playlist);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }
+
+        @DeleteMapping
+        public ResponseEntity<Void> unlikePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal User user) {
+            Playlist playlist = playlistService.getById(playlistId);
+            likeService.unlikePlaylist(user, playlist);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        @GetMapping("/count")
+        public ResponseEntity<Long> getLikeCount(@PathVariable Long playlistId) {
+            Playlist playlist = playlistService.getById(playlistId);
+            long likeCount = likeService.countLikes(playlist);
+            return new ResponseEntity<>(likeCount, HttpStatus.OK);
+        }
+    }
+
 }
