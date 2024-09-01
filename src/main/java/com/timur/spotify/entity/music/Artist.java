@@ -15,4 +15,6 @@ public class Artist implements Serializable {
     @Column(nullable = true)
     private byte[] avatar;
 
+    public Artist(long l, String artistName, byte[] bytes) {
+    }
 }
