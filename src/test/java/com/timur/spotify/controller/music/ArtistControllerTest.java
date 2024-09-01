@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,8 +26,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
 @WebMvcTest(ArtistController.class)
 public class ArtistControllerTest {
+
+
 
     @Autowired
     private MockMvc mockMvc; //делает Http запросы
@@ -65,5 +69,33 @@ public class ArtistControllerTest {
 
     }
 
+    @Test
+    void getArtistById_ShouldReturnArtistWhenExists() throws Exception {
+        // Arrange
+        Artist artist = new Artist(1L, "Artist Name", new byte[0]);
+        when(mockService.getArtistById(1L)).thenReturn(Optional.of(artist));
 
+        // Act and Assert
+        mockMvc.perform(get("/artist/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Artist Name"));
+
+        verify(mockService, times(1)).getArtistById(1L);
+    }
+
+
+    @Test
+    void getArtistById_ShouldReturnNotFoundWhenDoesNotExist() throws Exception {
+        // Arrange
+        when(mockService.getArtistById(1L)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        mockMvc.perform(get("/artist/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(mockService, times(1)).getArtistById(1L);
+    }
 }
