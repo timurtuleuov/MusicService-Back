@@ -53,7 +53,7 @@ public class TrackController {
     @GetMapping("/audio/{fileName:.+}")
     public ResponseEntity<ByteArrayResource> getAudioFile(@PathVariable String fileName) throws IOException {
         logger.info("OPERATION: Getting audio of track by name {}", fileName);
-        File file = new File("D:\\IT\\SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
+        File file = new File("D:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
 
         if (!file.exists()) {
             logger.error("FAIL: Audio file with name {} doens't exist", fileName);

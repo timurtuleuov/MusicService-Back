@@ -12,7 +12,7 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private final String uploadDirectory = "D:\\IT\\SpotifyClone\\spotify\\src\\main\\resources\\static\\";
+    private final String uploadDirectory = "D:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\";
 
     public String saveFile(MultipartFile file) throws IOException {
         // Создаем уникальное имя файла

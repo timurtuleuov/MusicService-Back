@@ -18,14 +18,14 @@ public class TrackService {
     public Track createTrack(Track track) {
         Track savedTrack = trackRepository.save(track);
 
-        cacheTrack(savedTrack);
+//        cacheTrack(savedTrack);
         return savedTrack;
     }
 
-    @CachePut(value = "TrackService::getTrackById", key = "#track.id")
+//    @CachePut(value = "TrackService::getTrackById", key = "#track.id")
     private void cacheTrack(Track track) {}
 
-    @Cacheable(value = "TrackService::getTrackById", key = "#id")
+//    @Cacheable(value = "TrackService::getTrackById", key = "#id")
     public Track getTrackById(Long id) {
         return trackRepository.findById(id).orElse(null);
     }
@@ -44,7 +44,7 @@ public class TrackService {
 //            return List.of();
 //        }
 //    }
-    @CachePut(value = "TrackService::getTrackById", key = "#id")
+//    @CachePut(value = "TrackService::getTrackById", key = "#id")
     public Track updateTrack(Long id, Track updatedTrack) {
         if (trackRepository.existsById(id)) {
             updatedTrack.setId(id);
@@ -52,7 +52,7 @@ public class TrackService {
         }
         return null;
     }
-    @CacheEvict(value = "TrackService::getTrackById", key = "#id")
+//    @CacheEvict(value = "TrackService::getTrackById", key = "#id")
     public boolean deleteTrack(Long id) {
         if (trackRepository.existsById(id)) {
             trackRepository.deleteById(id);

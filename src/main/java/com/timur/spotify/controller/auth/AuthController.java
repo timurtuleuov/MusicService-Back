@@ -36,8 +36,9 @@ public class AuthController {
     @PostMapping("/sign-in")
     public JwtAuthenticationResponse signIn(@RequestBody @Valid SignInRequest request) {
         logger.info("OPERATION: User {} signing in", request.getUsername());
-        JwtAuthenticationResponse response = authService.signIn(request);
+
+        return authService.signIn(request);
 //        this.kafkaProducer.sendMessage("auth-topic", "User signed in: " + request.getUsername());
-        return response;
+
     }
 }

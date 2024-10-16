@@ -1,54 +1,91 @@
 package com.timur.spotify.service.auth;
 
+import com.timur.spotify.entity.auth.Role;
 import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.repository.auth.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository repository;
 
-    public UserService(UserRepository repository) {
-        this.repository = repository;
-    }
-
-    // save user
-    public User save(User user){
+    /**
+     * Сохранение пользователя
+     *
+     * @return сохраненный пользователь
+     */
+    public User save(User user) {
         return repository.save(user);
     }
 
-    // getById user
-    public User getById(Long id){
-        return repository.getReferenceById(id);
+
+    /**
+     * Создание пользователя
+     *
+     * @return созданный пользователь
+     */
+    public User create(User user) {
+        if (repository.existsByUsername(user.getUsername())) {
+            // Заменить на свои исключения
+            throw new RuntimeException("Пользователь с таким именем уже существует");
+        }
+
+        if (repository.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("Пользователь с таким email уже существует");
+        }
+
+        return save(user);
     }
 
-    // get all users
-    public List<User> getAllUser(){
-        return repository.findAll();
-    }
+    /**
+     * Получение пользователя по имени пользователя
+     *
+     * @return пользователь
+     */
     public User getByUsername(String username) {
         return repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
     }
+
+    /**
+     * Получение пользователя по имени пользователя
+     * <p>
+     * Нужен для Spring Security
+     *
+     * @return пользователь
+     */
     public UserDetailsService userDetailsService() {
         return this::getByUsername;
     }
-    // update user
-    public User update(User user){
-        User updatedUser = getById(user.getId());
-        updatedUser.setEmail(user.getEmail())
-                .setPassword(user.getPassword())
-                .setUsername(user.getUsername());
-        return repository.save(updatedUser);
+
+    /**
+     * Получение текущего пользователя
+     *
+     * @return текущий пользователь
+     */
+    public User getCurrentUser() {
+        // Получение имени пользователя из контекста Spring Security
+        var username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return getByUsername(username);
     }
 
-    // delete user
-    public void delete(Long id) {
-        repository.deleteById(id);
-    }
 
+    /**
+     * Выдача прав администратора текущему пользователю
+     * <p>
+     * Нужен для демонстрации
+     */
+    @Deprecated
+    public void getAdmin() {
+        var user = getCurrentUser();
+        user.setRole(Role.ROLE_ADMIN);
+        save(user);
+    }
 }

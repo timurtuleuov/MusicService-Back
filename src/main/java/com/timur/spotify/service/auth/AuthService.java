@@ -1,10 +1,13 @@
 package com.timur.spotify.service.auth;
 
+import com.timur.spotify.controller.auth.AuthController;
 import com.timur.spotify.dto.JwtAuthenticationResponse;
 import com.timur.spotify.dto.SignInRequest;
 import com.timur.spotify.dto.SignUpRequest;
 import com.timur.spotify.entity.auth.Role;
 import com.timur.spotify.entity.auth.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +20,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     public AuthService(UserService userService, JwtService jwtService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.jwtService = jwtService;
@@ -56,6 +59,7 @@ public class AuthService {
                 .userDetailsService()
                 .loadUserByUsername(request.getUsername());
 
+        logger.info("Получаем юзера {} ", user);
         var jwt = jwtService.generateToken(user);
         return new JwtAuthenticationResponse(jwt);
     }
