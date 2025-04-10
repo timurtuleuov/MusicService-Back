@@ -12,13 +12,14 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private final String uploadDirectory = "D:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\";
-
     public String saveFile(MultipartFile file) throws IOException {
         // Создаем уникальное имя файла
         String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
 
         // Путь к директории сохранения файла
+        //    private final String uploadDirectory = "D:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\";
+        //path on work place
+        String uploadDirectory = "D:\\MusicService-Back\\src\\main\\resources\\static";
         Path uploadPath = Paths.get(uploadDirectory);
 
         // Создаем директорию, если она не существует
