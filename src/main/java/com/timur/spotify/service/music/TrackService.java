@@ -1,6 +1,9 @@
 package com.timur.spotify.service.music;
 
+import com.timur.spotify.dto.TrackDTO;
 import com.timur.spotify.entity.music.Track;
+import com.timur.spotify.entity.music.TrackLike;
+import com.timur.spotify.repository.music.TrackLikeRepository;
 import com.timur.spotify.repository.music.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -9,11 +12,15 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TrackService {
     @Autowired
     private TrackRepository trackRepository;
+    @Autowired
+    private TrackLikeRepository likeRepository;
 
     public Track createTrack(Track track) {
         Track savedTrack = trackRepository.save(track);
@@ -59,5 +66,29 @@ public class TrackService {
             return true;
         }
         return false;
+    }
+
+    public List<TrackDTO> getTrackFeed(Long userId) {
+        List<Track> tracks = trackRepository.findAll(); // Получаем все треки для ленты
+        List<TrackLike> userLikes = likeRepository.findByUserId(userId);
+
+        // Создаём список ID лайкнутых треков
+        Set<Long> likedTrackIds = userLikes.stream()
+                .map(trackLike -> trackLike.getTrack().getId())
+                .collect(Collectors.toSet());
+
+        // Преобразуем треки в DTO с информацией о лайках
+        return tracks.stream()
+                .map(track -> {
+                    TrackDTO dto = new TrackDTO();
+                    dto.setId(track.getId());
+                    dto.setName(track.getName());
+                    dto.setGenre(track.getGenre().name());
+                    dto.setAudioPath(track.getAudioPath());
+                    dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
+                    dto.setLiked(likedTrackIds.contains(track.getId()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }

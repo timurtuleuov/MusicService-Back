@@ -8,7 +8,9 @@ import com.timur.spotify.entity.music.TrackLike;
 import com.timur.spotify.repository.music.TrackLikeRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TrackLikeService {
@@ -28,6 +30,13 @@ public class TrackLikeService {
         // Если нет, создаем новый лайк
         TrackLike like = new TrackLike(user, track);
         return likeRepository.save(like);
+    }
+
+    public List<Track> getLikedTracks(Long userId) {
+        List<TrackLike> trackLikes = likeRepository.findByUserId(userId);
+        return trackLikes.stream()
+                .map(TrackLike::getTrack)
+                .collect(Collectors.toList());
     }
     public void unlikeTrack(User user, Track track) {
         likeRepository.deleteByUserAndTrack(user, track);

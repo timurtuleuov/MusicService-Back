@@ -1,5 +1,6 @@
 package com.timur.spotify.controller.music;
 
+import com.timur.spotify.dto.TrackDTO;
 import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.music.Album;
 import com.timur.spotify.entity.music.GenreType;
@@ -42,19 +43,29 @@ public class TrackController {
     private AlbumService albumService;
     @Autowired
     private FileStorageService fileStorageService;
-
+    @Autowired
+    private TrackLikeService likeService;
     @GetMapping
     public ResponseEntity<List<Track>> getAllTracks() {
         List<Track> tracks = trackService.getAllTracks();
         return new ResponseEntity<>(tracks, HttpStatus.OK);
+    }
+    @GetMapping("/{userId}/liked-tracks")
+    public List<Track> getLikedTracks(@PathVariable Long userId) {
+        return likeService.getLikedTracks(userId);
+    }
+
+    @GetMapping("/tracks")
+    public List<TrackDTO> getTrackFeed(@RequestParam("userId") Long userId) {
+        return trackService.getTrackFeed(userId);
     }
 
     //  Контроллер для воспроизведения аудио
     @GetMapping("/audio/{fileName:.+}")
     public ResponseEntity<ByteArrayResource> getAudioFile(@PathVariable String fileName) throws IOException {
         logger.info("OPERATION: Getting audio of track by name {}", fileName);
-        File file = new File("D:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
-
+//        File file = new File("D:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
+        File file = new File("D:\\MusicService-Back\\src\\main\\resources\\static\\" + fileName);
         if (!file.exists()) {
             logger.error("FAIL: Audio file with name {} doens't exist", fileName);
             return ResponseEntity.notFound().build();
@@ -129,6 +140,8 @@ public class TrackController {
         }
     }
 
+
+
     // Создание нового трека
     @PostMapping
     public ResponseEntity<Track> createTrack(@RequestParam("name") String name, @RequestParam("albumId")
@@ -198,6 +211,7 @@ public class TrackController {
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
 
+
         @DeleteMapping
         public ResponseEntity<Void> unlikeTrack(@PathVariable Long trackId, @AuthenticationPrincipal User user) {
             Track track = trackService.getTrackById(trackId);
@@ -211,5 +225,6 @@ public class TrackController {
             long likeCount = likeService.countLikes(track);
             return new ResponseEntity<>(likeCount, HttpStatus.OK);
         }
+
     }
 }
