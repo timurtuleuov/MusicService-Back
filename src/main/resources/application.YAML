@@ -21,6 +21,8 @@ spring:
     password: 12345678
     driverClassName: org.postgresql.Driver
 hibernate:
+  connection:
+    autocommit: false
   type:
     wrapper_array_handling: ALLOW
 security:
