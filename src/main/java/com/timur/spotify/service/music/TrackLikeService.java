@@ -53,10 +53,10 @@ public class TrackLikeService {
             TrackDTO trackDTO = new TrackDTO();
             trackDTO.setId(track.getId());
             trackDTO.setName(track.getName());
-            trackDTO.setGenre(track.getGenre().name()); // Преобразуем enum в String
+            trackDTO.setGenre(track.getGenre().name());
             trackDTO.setAudioPath(track.getAudioPath());
-            trackDTO.setAlbum(track.getAlbum()); // Предполагаем, что Album уже совместим с DTO
-            trackDTO.setLiked(likedTrackIds.contains(track.getId())); // Проверяем, лайкнул ли пользователь
+            trackDTO.setAlbum(track.getAlbum());
+            trackDTO.setLiked(likedTrackIds.contains(track.getId()));
             return trackDTO;
         }).collect(Collectors.toList());
 
