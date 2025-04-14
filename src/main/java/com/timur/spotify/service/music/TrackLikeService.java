@@ -64,12 +64,19 @@ public class TrackLikeService {
     }
 
     @Transactional
-    public List<Track> getLikedTracks(Long userId) {
+    public List<TrackDTO> getLikedTracks(Long userId) {
         List<TrackLike> trackLikes = likeRepository.findByUserId(userId);
-//        List<TrackDTO> finalTracks =
-        return trackLikes.stream()
-                .map(TrackLike::getTrack)
-                .collect(Collectors.toList());
+        List<TrackDTO> tracksByUser = trackLikes.stream().map(track -> {
+            TrackDTO trackDTO = new TrackDTO();
+            trackDTO.setId(track.getId());
+            trackDTO.setName(track.getTrack().getName());
+            trackDTO.setGenre(track.getTrack().getGenre().name());
+            trackDTO.setAudioPath(track.getTrack().getAudioPath());
+            trackDTO.setAlbum(track.getTrack().getAlbum());
+            trackDTO.setLiked(true);
+            return trackDTO;
+        }).collect(Collectors.toList());
+        return tracksByUser;
     }
 
     @Transactional
