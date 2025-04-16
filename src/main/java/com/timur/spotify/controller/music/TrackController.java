@@ -10,6 +10,12 @@ import com.timur.spotify.service.music.AlbumService;
 import com.timur.spotify.service.music.FileStorageService;
 import com.timur.spotify.service.music.TrackLikeService;
 import com.timur.spotify.service.music.TrackService;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.TagException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +30,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -152,7 +162,7 @@ public class TrackController {
     @PostMapping
     public ResponseEntity<Track> createTrack(@RequestParam("name") String name, @RequestParam("albumId")
                                              Long albumId, @RequestParam("genre") String genre,
-                                             @RequestParam("audio") MultipartFile audio) throws IOException {
+                                             @RequestParam("audio") MultipartFile audio) throws IOException, UnsupportedAudioFileException {
         logger.info("OPERATION: Creating track with name {}, album ID {} and genre {}",
                 name, albumId, genre);
         Optional<Album> albumOptional = albumService.getAlbumById(albumId);
@@ -161,10 +171,45 @@ public class TrackController {
         newTrack.setAlbum(album);
         newTrack.setName(name);
         newTrack.setGenre(GenreType.valueOf(genre));
+
+        // Сохранить аудиофайл
         String filePath = fileStorageService.saveFile(audio);
         newTrack.setAudioPath(filePath);
+
+        // Извлечь длительность аудиофайла
+        Integer durationInSeconds = 0; // Default value
+        File tempFile = null;
+        try {
+            // Save MultipartFile to a temporary file
+            tempFile = Files.createTempFile("track_", audio.getOriginalFilename()).toFile();
+            audio.transferTo(tempFile);
+
+            // Read audio metadata
+            AudioFile audioMetadata = AudioFileIO.read(tempFile);
+            durationInSeconds = audioMetadata.getAudioHeader().getTrackLength();
+            logger.info("Calculated duration for track {}: {} seconds", name, durationInSeconds);
+        } catch (CannotReadException | InvalidAudioFrameException | TagException | IOException e) {
+            logger.warn("Error extracting duration for track " + name + ": " + e.getMessage() + ". File: " + audio.getOriginalFilename());
+            // Continue with duration = 0
+        } catch (ReadOnlyFileException e) {
+            throw new RuntimeException(e);
+        } finally {
+            // Clean up temporary file
+            if (tempFile != null && tempFile.exists()) {
+                try {
+                    Files.delete(tempFile.toPath());
+                } catch (IOException e) {
+                    logger.warn("Failed to delete temporary file: " + e.getMessage());
+                }
+            }
+        }
+
+        newTrack.setDuration(durationInSeconds);
+
+        // Сохранить трек
         Track createdTrack = trackService.createTrack(newTrack);
         logger.info("SUCCESS: Created track with name {}", name);
+
         return new ResponseEntity<>(createdTrack, HttpStatus.CREATED);
     }
 

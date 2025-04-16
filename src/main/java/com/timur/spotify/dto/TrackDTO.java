@@ -11,4 +11,5 @@ public class TrackDTO {
     private String audioPath;
     private Album album; // Вложенный DTO для альбома
     private boolean liked; // Лайкнул ли пользователь
+    private Integer duration;
 }
