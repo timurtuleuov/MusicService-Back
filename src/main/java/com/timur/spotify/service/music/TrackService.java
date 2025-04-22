@@ -91,4 +91,32 @@ public class TrackService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public List<Track> getTracksByArtist(Long artistId) {
+        List<Track> tracksByArtist = trackRepository.findByAlbum_Artist_Id(artistId);
+        return tracksByArtist;
+    }
+
+    public List<TrackDTO> getTracksByArtist(Long artistId, Long userId) {
+        List<Track> tracksByArtist = getTracksByArtist(artistId);
+
+        List<TrackLike> tracksByArtistWithLikesFromUser = likeRepository.findByUserId(userId);
+        Set<Long> likedTrackIds = userLikes.stream()
+                .map(trackLike -> trackLike.getTrack().getId())
+                .collect(Collectors.toSet());
+
+        // Преобразуем треки в DTO с информацией о лайках
+        return tracksByArtist.stream()
+                .map(track -> {
+                    TrackDTO dto = new TrackDTO();
+                    dto.setId(track.getId());
+                    dto.setName(track.getName());
+                    dto.setGenre(track.getGenre().name());
+                    dto.setAudioPath(track.getAudioPath());
+                    dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
+                    dto.setLiked(likedTrackIds.contains(track.getId()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 }

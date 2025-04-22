@@ -66,6 +66,11 @@ public class TrackController {
         return trackService.getTrackFeed(userId);
     }
 
+    @GetMapping("/tracks-by-artist")
+    public List<TrackDTO> getTrackFeed(@RequestParam("artistId") Long artistId, @RequestParam("userId") Long userId) {
+        return trackService.getTracksByArtist(artistId, userId);
+    }
+
     //  Контроллер для воспроизведения аудио
     @GetMapping("/audio/{fileName:.+}")
     public ResponseEntity<ByteArrayResource> getAudioFile(@PathVariable String fileName) throws IOException {
