@@ -74,6 +74,7 @@ public class TrackLikeService {
             trackDTO.setAudioPath(track.getTrack().getAudioPath());
             trackDTO.setAlbum(track.getTrack().getAlbum());
             trackDTO.setLiked(true);
+            trackDTO.setDuration(track.getTrack().getDuration());
             return trackDTO;
         }).collect(Collectors.toList());
         return tracksByUser;
