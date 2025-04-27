@@ -99,7 +99,7 @@ public class TrackService {
 
     public List<TrackDTO> getTracksByArtist(Long artistId, Long userId) {
         List<Track> tracksByArtist = getTracksByArtist(artistId);
-
+        List<TrackLike> userLikes = likeRepository.findByUserId(userId);
         List<TrackLike> tracksByArtistWithLikesFromUser = likeRepository.findByUserId(userId);
         Set<Long> likedTrackIds = userLikes.stream()
                 .map(trackLike -> trackLike.getTrack().getId())

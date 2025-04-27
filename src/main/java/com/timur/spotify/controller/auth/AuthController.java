@@ -6,11 +6,13 @@ import com.timur.spotify.dto.SignInRequest;
 import com.timur.spotify.dto.SignUpRequest;
 import com.timur.spotify.service.auth.AuthService;
 import com.timur.spotify.service.kafka.ProducerService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -40,5 +42,10 @@ public class AuthController {
         return authService.signIn(request);
 //        this.kafkaProducer.sendMessage("auth-topic", "User signed in: " + request.getUsername());
 
+    }
+
+    @PostMapping("/refresh")
+    public JwtAuthenticationResponse signIn(@RequestHeader("Authorization") String bearerToken) {
+        return authService.refreshToken(bearerToken);
     }
 }

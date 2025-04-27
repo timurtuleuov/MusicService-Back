@@ -85,6 +85,14 @@ public class JwtService {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
     }
 
+    public String refreshToken(String oldToken) {
+        Claims claims = extractAllClaims(oldToken);
+        String username = claims.getSubject();
+        return Jwts.builder().setClaims(claims).setSubject(username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
+    }
     /**
      * Проверка токена на просроченность
      *

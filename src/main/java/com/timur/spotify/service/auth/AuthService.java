@@ -6,6 +6,7 @@ import com.timur.spotify.dto.SignInRequest;
 import com.timur.spotify.dto.SignUpRequest;
 import com.timur.spotify.entity.auth.Role;
 import com.timur.spotify.entity.auth.User;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -61,6 +62,15 @@ public class AuthService {
 
         logger.info("Получаем юзера {} ", user);
         var jwt = jwtService.generateToken(user);
+        return new JwtAuthenticationResponse(jwt);
+    }
+
+    public JwtAuthenticationResponse refreshToken(String bearerToken) {
+
+        String token = bearerToken.substring(7);
+
+
+        var jwt = jwtService.refreshToken(token);
         return new JwtAuthenticationResponse(jwt);
     }
 }
