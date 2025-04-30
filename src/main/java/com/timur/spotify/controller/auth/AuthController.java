@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -45,7 +47,15 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public JwtAuthenticationResponse signIn(@RequestHeader("Authorization") String bearerToken) {
-        return authService.refreshToken(bearerToken);
+    public JwtAuthenticationResponse refresh(@RequestHeader("Authorization") String bearerToken) {
+        logger.info("OPERATION: REFRESH TOKEN {}", bearerToken);
+        try {
+            return authService.refreshToken(bearerToken);
+        } catch (Exception e) {
+            logger.error("OPERATION: REFRESH TOKEN - Failed to refresh token. Error: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new JwtAuthenticationResponse()).getBody();
+        }
+
     }
 }

@@ -76,8 +76,9 @@ public class TrackController {
         return trackService.getTrackFeed(userId);
     }
 
-    @GetMapping("/tracks-by-artist")
-    public List<TrackDTO> getTrackFeed(@RequestParam("artistId") Long artistId, @RequestParam("userId") Long userId) {
+    @GetMapping("/artist/{artistId}")
+    public List<TrackDTO> getTrackFeed(@PathVariable Long artistId, @RequestParam("userId") Long userId) {
+        logger.info("OPERATION: Getting tracks of artist for user {}", userId);
         return trackService.getTracksByArtist(artistId, userId);
     }
 
@@ -85,8 +86,8 @@ public class TrackController {
     @GetMapping("/audio/{fileName:.+}")
     public ResponseEntity<ByteArrayResource> getAudioFile(@PathVariable String fileName) throws IOException {
         logger.info("OPERATION: Getting audio of track by name {}", fileName);
-        File file = new File("E:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
-//        File file = new File("D:\\MusicService-Back\\src\\main\\resources\\static\\" + fileName);
+//        File file = new File("E:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
+        File file = new File("D:\\MusicService-Back\\src\\main\\resources\\static\\" + fileName);
         if (!file.exists()) {
             logger.error("FAIL: Audio file with name {} doens't exist", fileName);
             return ResponseEntity.notFound().build();

@@ -5,6 +5,7 @@ import com.timur.spotify.entity.music.Track;
 import com.timur.spotify.entity.music.TrackLike;
 import com.timur.spotify.repository.music.TrackLikeRepository;
 import com.timur.spotify.repository.music.TrackRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -96,7 +97,7 @@ public class TrackService {
         List<Track> tracksByArtist = trackRepository.findByAlbum_Artist_Id(artistId);
         return tracksByArtist;
     }
-
+    @Transactional
     public List<TrackDTO> getTracksByArtist(Long artistId, Long userId) {
         List<Track> tracksByArtist = getTracksByArtist(artistId);
         List<TrackLike> userLikes = likeRepository.findByUserId(userId);
