@@ -101,13 +101,36 @@ public class TrackService {
     public List<TrackDTO> getTracksByArtist(Long artistId, Long userId) {
         List<Track> tracksByArtist = getTracksByArtist(artistId);
         List<TrackLike> userLikes = likeRepository.findByUserId(userId);
-        List<TrackLike> tracksByArtistWithLikesFromUser = likeRepository.findByUserId(userId);
+
         Set<Long> likedTrackIds = userLikes.stream()
                 .map(trackLike -> trackLike.getTrack().getId())
                 .collect(Collectors.toSet());
 
         // Преобразуем треки в DTO с информацией о лайках
         return tracksByArtist.stream()
+                .map(track -> {
+                    TrackDTO dto = new TrackDTO();
+                    dto.setId(track.getId());
+                    dto.setName(track.getName());
+                    dto.setGenre(track.getGenre().name());
+                    dto.setAudioPath(track.getAudioPath());
+                    dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
+                    dto.setLiked(likedTrackIds.contains(track.getId()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<TrackDTO> searchTracks(String query, Long userId) {
+        List<Track> tracks =  trackRepository.findByNameContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(query, query);
+        List<TrackLike> userLikes = likeRepository.findByUserId(userId);
+        Set<Long> likedTrackIds = userLikes.stream()
+                .map(trackLike -> trackLike.getTrack().getId())
+                .collect(Collectors.toSet());
+
+        // Преобразуем треки в DTO с информацией о лайках
+        return tracks.stream()
                 .map(track -> {
                     TrackDTO dto = new TrackDTO();
                     dto.setId(track.getId());
