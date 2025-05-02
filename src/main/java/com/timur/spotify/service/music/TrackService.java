@@ -122,6 +122,29 @@ public class TrackService {
     }
 
     @Transactional
+    public List<TrackDTO> getTracksByAlbum(Long albumId, Long userId) {
+        List<Track> tracksByAlbum = trackRepository.findByAlbum_Id(albumId);
+
+        List<TrackLike> trackLikes = likeRepository.findByUserId(userId);
+
+        Set<Long> likedTrackIds = trackLikes.stream()
+                .map(trackLike -> trackLike.getTrack().getId())
+                .collect(Collectors.toSet());
+        return tracksByAlbum.stream()
+                .map(track -> {
+                    TrackDTO dto = new TrackDTO();
+                    dto.setId(track.getId());
+                    dto.setName(track.getName());
+                    dto.setGenre(track.getGenre().name());
+                    dto.setAudioPath(track.getAudioPath());
+                    dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
+                    dto.setLiked(likedTrackIds.contains(track.getId()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
     public List<TrackDTO> searchTracks(String query, Long userId) {
         List<Track> tracks =  trackRepository.findByNameContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(query, query);
         List<TrackLike> userLikes = likeRepository.findByUserId(userId);
