@@ -81,7 +81,7 @@ public class TrackController {
         logger.info("OPERATION: Getting tracks of artist for user {}", userId);
         return trackService.getTracksByArtist(artistId, userId);
     }
-    
+
     @GetMapping("/album/{albumId}")
     public List<TrackDTO> getTrackByAlbum(@PathVariable Long albumId, @RequestParam("userId") Long userId) {
         logger.info("OPERATION: Getting tracks from album  {}", albumId);
