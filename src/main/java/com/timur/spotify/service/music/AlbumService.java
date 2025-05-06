@@ -40,4 +40,8 @@ public class AlbumService {
         }
         return false;
     }
+
+    public List<Album> getAllAlbumByArtist(Long artistId) {
+        return albumRepository.findAllByArtistId(artistId);
+    }
 }
