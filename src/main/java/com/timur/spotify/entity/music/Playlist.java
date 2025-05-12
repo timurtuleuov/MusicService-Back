@@ -14,7 +14,7 @@ public class Playlist {
     private String name;
     private String cover;
     private boolean isPrivate;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

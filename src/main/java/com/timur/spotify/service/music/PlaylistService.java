@@ -1,5 +1,6 @@
 package com.timur.spotify.service.music;
 
+import com.timur.spotify.dto.PlaylistDTO;
 import com.timur.spotify.entity.music.Playlist;
 import com.timur.spotify.repository.music.PlaylistRepository;
 import org.springframework.stereotype.Service;
@@ -28,9 +29,18 @@ public class PlaylistService {
 
 
 //    Возможно, надо будет переделать для оптимизации приложения
-    public List<Playlist> getAllPlaylistByAuthorId(Long authorId){
-        return playlistRepository.findAll().stream().filter(p -> p.getUser().getId().equals(authorId)).collect(Collectors.toList());
-    }
+public List<PlaylistDTO> getAllPlaylistByAuthorId(Long authorId) {
+    List<Playlist> playlists = playlistRepository.findByUserId(authorId);
+    return playlists.stream().map(playlist -> {
+        PlaylistDTO dto = new PlaylistDTO();
+        dto.setId(playlist.getId());
+        dto.setName(playlist.getName());
+        dto.setCover(playlist.getCover());
+        dto.setPrivate(playlist.isPrivate());
+        dto.setUserId(playlist.getUser() != null ? playlist.getUser().getId() : null);
+        return dto;
+    }).collect(Collectors.toList());
+}
 
     public Playlist updatePlaylist(Long id, Playlist playlist) {
         if (playlistRepository.existsById(id)) {

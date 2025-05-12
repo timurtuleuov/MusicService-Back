@@ -1,5 +1,6 @@
 package com.timur.spotify.controller.music;
 
+import com.timur.spotify.dto.PlaylistDTO;
 import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.music.Playlist;
 import com.timur.spotify.service.auth.JwtService;
@@ -76,17 +77,12 @@ public class PlaylistController {
         }
     }
 
-    @GetMapping("/author/{authorId}")
-    public ResponseEntity<List<Playlist>> getAllPlaylistsByAuthorId(@PathVariable Long authorId) {
-        logger.info("OPERATION: Getting playlist by author id {}", authorId);
-        List<Playlist> playlists = playlistService.getAllPlaylistByAuthorId(authorId);
-        if (!playlists.isEmpty()) {
-            logger.info("SUCCESS: Found playlist by author id {}", authorId);
-            return new ResponseEntity<>(playlists, HttpStatus.OK);
-        } else {
-            logger.info("SUCCESS: Not found playlist by author id {}", authorId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping("/author/{userId}")
+    public ResponseEntity<List<PlaylistDTO>> getPlaylistsByAuthorId(@PathVariable Long userId) {
+        logger.info("OPERATION: Getting playlist by author id {}", userId);
+        List<PlaylistDTO> playlists = playlistService.getAllPlaylistByAuthorId(userId);
+        logger.info("SUCCESS: Found playlist by author id {}", userId);
+        return new ResponseEntity<>(playlists, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
