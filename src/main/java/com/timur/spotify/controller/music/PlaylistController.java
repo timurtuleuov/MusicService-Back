@@ -2,9 +2,11 @@ package com.timur.spotify.controller.music;
 
 import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.music.Playlist;
+import com.timur.spotify.service.auth.JwtService;
 import com.timur.spotify.service.auth.UserService;
 import com.timur.spotify.service.music.PlaylistLikeService;
 import com.timur.spotify.service.music.PlaylistService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,15 +22,44 @@ public class PlaylistController {
     private static final Logger logger = LoggerFactory.getLogger(PlaylistController.class);
 
     private final PlaylistService playlistService;
+    private final JwtService jwtService;
 
-    public PlaylistController(PlaylistService playlistService) {
+    public PlaylistController(PlaylistService playlistService, JwtService jwtService) {
         this.playlistService = playlistService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping
-    public ResponseEntity<Playlist> createPlaylist(@RequestBody Playlist playlist) {
-        logger.info("OPERATION: Creating playlist with name {} by author", playlist.getName(), playlist.getAuthor().getUsername());
+    public ResponseEntity<Playlist> createPlaylist(@RequestBody Playlist playlist, HttpServletRequest request) {
+        logger.info("OPERATION: Received request to create playlist");
+        logger.info("Playlist details: name={}, isPrivate={}, cover={}",
+                playlist.getName(), playlist.isPrivate(), playlist.getCover());
+
+        // Извлечение токена из заголовка
+        String token = request.getHeader("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Authorization header must contain Bearer token");
+        }
+        token = token.substring(7); // Удаляем "Bearer "
+
+        // Извлечение userId из токена
+        Long userId = jwtService.extractUserId(token);
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID not found in token");
+        }
+
+        // Установка пользователя на основе userId
+        User user = new User();
+        user.setId(userId);
+        playlist.setUser(user);
+
+        logger.info("Author details: id={}", playlist.getUser().getId());
+
+        logger.info("OPERATION: Creating playlist with name {} by user {}",
+                playlist.getName(), playlist.getUser().getId());
         Playlist createdPlaylist = playlistService.createPlaylist(playlist);
+        logger.info("SUCCESS: Playlist created with id {}", createdPlaylist.getId());
+
         return new ResponseEntity<>(createdPlaylist, HttpStatus.CREATED);
     }
 

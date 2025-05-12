@@ -38,7 +38,7 @@ public class AlbumController {
         return new ResponseEntity<>(albums, HttpStatus.OK);
     }
 
-    @GetMapping("/albums/{id}")
+    @GetMapping("/albums/{artistId}")
     public List<Album> getAllAlbumsByArtist(@PathVariable Long artistId) {
         return albumService.getAllAlbumByArtist(artistId);
     }

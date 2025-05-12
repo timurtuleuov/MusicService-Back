@@ -29,7 +29,7 @@ public class PlaylistService {
 
 //    Возможно, надо будет переделать для оптимизации приложения
     public List<Playlist> getAllPlaylistByAuthorId(Long authorId){
-        return playlistRepository.findAll().stream().filter(p -> p.getAuthor().getId().equals(authorId)).collect(Collectors.toList());
+        return playlistRepository.findAll().stream().filter(p -> p.getUser().getId().equals(authorId)).collect(Collectors.toList());
     }
 
     public Playlist updatePlaylist(Long id, Playlist playlist) {

@@ -32,6 +32,16 @@ public class JwtService {
     }
 
     /**
+     * Извлечение ID пользователя из токена
+     *
+     * @param token токен
+     * @return ID пользователя
+     */
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("id", Long.class));
+    }
+
+    /**
      * Генерация токена
      *
      * @param userDetails данные пользователя
