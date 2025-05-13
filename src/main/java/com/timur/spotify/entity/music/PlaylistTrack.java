@@ -13,16 +13,15 @@ public class PlaylistTrack {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "track_id", nullable = false)
     private Track track;
 
     private Integer orderInPlaylist;
 
-    @Column(updatable = false)
     private LocalDateTime addedAt = LocalDateTime.now();
 }

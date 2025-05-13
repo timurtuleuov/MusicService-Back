@@ -39,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,6 +75,12 @@ public class TrackController {
     @GetMapping("/tracks")
     public List<TrackDTO> getTrackFeed(@RequestParam("userId") Long userId) {
         return trackService.getTrackFeed(userId);
+    }
+
+    @GetMapping("/tracks-list")
+    public List<TrackDTO> getTrackFeedList(@RequestParam("ids") Long[] idArray, @RequestParam("userId") Long userId) {
+        logger.info("OPERATION: Getting tracks by ids  {}", Arrays.toString(idArray));
+        return trackService.getTracksByIDs(idArray, userId);
     }
 
     @GetMapping("/artist/{artistId}")
@@ -166,6 +173,7 @@ public class TrackController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
 
 
 

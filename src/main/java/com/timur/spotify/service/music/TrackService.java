@@ -93,6 +93,25 @@ public class TrackService {
                 .collect(Collectors.toList());
     }
 
+    public List<TrackDTO> getTracksByIDs(Long[] idArray, Long userId){
+        List<Track> tracks = trackRepository.findAll();
+        List<TrackLike> trackLikes = likeRepository.findAllByIdIn(idArray);
+        Set<Long> likedTrackIds =  trackLikes.stream()
+                .map(trackLike -> trackLike.getTrack().getId())
+                .collect(Collectors.toSet());
+        return tracks.stream()
+                .map(track -> {
+                    TrackDTO dto = new TrackDTO();
+                    dto.setId(track.getId());
+                    dto.setName(track.getName());
+                    dto.setGenre(track.getGenre().name());
+                    dto.setAudioPath(track.getAudioPath());
+                    dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
+                    dto.setLiked(likedTrackIds.contains(track.getId()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
     public List<Track> getTracksByArtist(Long artistId) {
         List<Track> tracksByArtist = trackRepository.findByAlbum_Artist_Id(artistId);
         return tracksByArtist;

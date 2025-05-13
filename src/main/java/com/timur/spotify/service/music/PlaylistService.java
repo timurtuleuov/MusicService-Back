@@ -1,6 +1,8 @@
 package com.timur.spotify.service.music;
 
 import com.timur.spotify.dto.PlaylistDTO;
+import com.timur.spotify.dto.PlaylistShortDTO;
+import com.timur.spotify.dto.PlaylistTrackDTO;
 import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.music.Playlist;
 import com.timur.spotify.entity.music.PlaylistTrack;
@@ -32,8 +34,7 @@ public class PlaylistService {
     }
 
     @Transactional
-    public Playlist createPlaylist(Playlist playlist) {
-        // Убедимся, что пользователь существует
+    public PlaylistDTO createPlaylist(Playlist playlist) {
         if (playlist.getUser() == null || playlist.getUser().getId() == null) {
             throw new IllegalArgumentException("User must be specified");
         }
@@ -41,34 +42,46 @@ public class PlaylistService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + playlist.getUser().getId()));
         playlist.setUser(user);
 
-        // Создаем новый список для обработанных PlaylistTrack
         List<PlaylistTrack> processedPlaylistTracks = new ArrayList<>();
 
-        // Обрабатываем playlistTracks
         if (playlist.getPlaylistTracks() != null && !playlist.getPlaylistTracks().isEmpty()) {
             for (PlaylistTrack playlistTrack : playlist.getPlaylistTracks()) {
-                // Проверяем, что трек существует
                 Track track = trackRepository.findById(playlistTrack.getTrack().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Track not found with id: " + playlistTrack.getTrack().getId()));
-
-                // Создаем новый объект PlaylistTrack
                 PlaylistTrack newPlaylistTrack = new PlaylistTrack();
-                newPlaylistTrack.setPlaylist(playlist); // Устанавливаем связь с плейлистом
+                newPlaylistTrack.setPlaylist(playlist);
                 newPlaylistTrack.setTrack(track);
                 newPlaylistTrack.setOrderInPlaylist(playlistTrack.getOrderInPlaylist());
                 newPlaylistTrack.setAddedAt(playlistTrack.getAddedAt() != null ? playlistTrack.getAddedAt() : LocalDateTime.now());
-                processedPlaylistTracks.add(newPlaylistTrack); // Добавляем в новый список
+                processedPlaylistTracks.add(newPlaylistTrack);
             }
-            // Устанавливаем обработанные треки в плейлист
             playlist.setPlaylistTracks(processedPlaylistTracks);
         }
 
-        // Сохраняем плейлист с каскадированием
         Playlist savedPlaylist = playlistRepository.save(playlist);
 
-        // Возвращаем обновленный плейлист
-        return playlistRepository.findById(savedPlaylist.getId())
-                .orElseThrow(() -> new IllegalStateException("Failed to retrieve saved playlist"));
+        // Конвертируем в DTO
+        PlaylistDTO playlistDTO = new PlaylistDTO();
+        playlistDTO.setId(savedPlaylist.getId());
+        playlistDTO.setName(savedPlaylist.getName());
+        playlistDTO.setCover(savedPlaylist.getCover());
+        playlistDTO.setPrivate(savedPlaylist.isPrivate());
+        playlistDTO.setName(savedPlaylist.getUser().getUsername());
+
+        if (savedPlaylist.getPlaylistTracks() != null) {
+            List<PlaylistTrackDTO> trackDTOs = savedPlaylist.getPlaylistTracks().stream().map(pt -> {
+                PlaylistTrackDTO dto = new PlaylistTrackDTO();
+                dto.setId(pt.getId());
+                dto.setPlaylistId(pt.getPlaylist().getId());
+                dto.setTrackId(pt.getTrack().getId());
+                dto.setOrderInPlaylist(pt.getOrderInPlaylist());
+                dto.setAddedAt(pt.getAddedAt());
+                return dto;
+            }).collect(Collectors.toList());
+            playlistDTO.setPlaylistTrackList(trackDTOs);
+        }
+
+        return playlistDTO;
     }
 
     @Transactional
@@ -78,10 +91,10 @@ public class PlaylistService {
     }
 
     @Transactional
-    public List<PlaylistDTO> getAllPlaylistByAuthorId(Long authorId) {
+    public List<PlaylistShortDTO> getAllPlaylistByAuthorId(Long authorId) {
         List<Playlist> playlists = playlistRepository.findByUserId(authorId);
         return playlists.stream()
-                .map(this::convertToDTO)
+                .map(this::convertToShortDTO)
                 .collect(Collectors.toList());
     }
 
@@ -93,10 +106,38 @@ public class PlaylistService {
         dto.setCover(playlist.getCover());
         dto.setPrivate(playlist.isPrivate());
         dto.setUsername(playlist.getUser() != null ? playlist.getUser().getUsername() : null);
-        dto.setPlaylistTrackList(playlist.getPlaylistTracks());
+
+        // Преобразование списка PlaylistTrack в PlaylistTrackDTO
+        if (playlist.getPlaylistTracks() != null) {
+            List<PlaylistTrackDTO> trackDTOs = playlist.getPlaylistTracks().stream().map(this::convertToTrackDTO).collect(Collectors.toList());
+            dto.setPlaylistTrackList(trackDTOs);
+        } else {
+            dto.setPlaylistTrackList(new ArrayList<>());
+        }
+
         return dto;
     }
 
+    // Вспомогательный метод для преобразования PlaylistTrack в PlaylistTrackDTO
+    private PlaylistTrackDTO convertToTrackDTO(PlaylistTrack playlistTrack) {
+        PlaylistTrackDTO dto = new PlaylistTrackDTO();
+        dto.setId(playlistTrack.getId());
+        dto.setPlaylistId(playlistTrack.getPlaylist() != null ? playlistTrack.getPlaylist().getId() : null);
+        dto.setTrackId(playlistTrack.getTrack() != null ? playlistTrack.getTrack().getId() : null);
+        dto.setOrderInPlaylist(playlistTrack.getOrderInPlaylist());
+        dto.setAddedAt(playlistTrack.getAddedAt());
+        return dto;
+    }
+
+    private PlaylistShortDTO convertToShortDTO(Playlist playlist) {
+        PlaylistShortDTO dto = new PlaylistShortDTO();
+        dto.setId(playlist.getId());
+        dto.setName(playlist.getName());
+        dto.setCover(playlist.getCover());
+        dto.setPrivate(playlist.isPrivate());
+        dto.setUsername(playlist.getUser() != null ? playlist.getUser().getUsername() : null);
+        return dto;
+    }
     public Playlist updatePlaylist(Long id, Playlist playlist) {
         if (playlistRepository.existsById(id)) {
             playlist.setId(id);

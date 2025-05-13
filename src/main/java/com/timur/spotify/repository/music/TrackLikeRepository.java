@@ -7,6 +7,7 @@ import com.timur.spotify.entity.music.TrackLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 public interface TrackLikeRepository extends JpaRepository<TrackLike, Long> {
     Optional<Like> findByUserAndTrack(User user, Track track);
     List<TrackLike> findByUserId(Long userId);
+    List<TrackLike> findAllByIdIn(Long[] userId);
     long countByTrack(Track post);
     void deleteByUserAndTrack(User user, Track track);
 }

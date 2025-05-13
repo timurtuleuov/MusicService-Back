@@ -1,8 +1,11 @@
 package com.timur.spotify.controller.music;
 
 import com.timur.spotify.dto.PlaylistDTO;
+import com.timur.spotify.dto.PlaylistShortDTO;
 import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.music.Playlist;
+import com.timur.spotify.entity.music.PlaylistTrack;
+import com.timur.spotify.entity.music.Track;
 import com.timur.spotify.service.auth.JwtService;
 import com.timur.spotify.service.auth.UserService;
 import com.timur.spotify.service.music.PlaylistLikeService;
@@ -16,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/playlist")
@@ -31,10 +35,10 @@ public class PlaylistController {
     }
 
     @PostMapping
-    public ResponseEntity<Playlist> createPlaylist(@RequestBody Playlist playlist, HttpServletRequest request) {
+    public ResponseEntity<PlaylistDTO> createPlaylist(@RequestBody PlaylistDTO playlistDTO, HttpServletRequest request) {
         logger.info("OPERATION: Received request to create playlist");
         logger.info("Playlist details: name={}, isPrivate={}, cover={}",
-                playlist.getName(), playlist.isPrivate(), playlist.getCover());
+                playlistDTO.getName(), playlistDTO.isPrivate(), playlistDTO.getCover());
 
         // Извлечение токена из заголовка
         String token = request.getHeader("Authorization");
@@ -49,19 +53,50 @@ public class PlaylistController {
             throw new IllegalArgumentException("User ID not found in token");
         }
 
-        // Установка пользователя на основе userId
-        User user = new User();
-        user.setId(userId);
-        playlist.setUser(user);
+        // Преобразование DTO в сущность Playlist для сохранения
+        Playlist playlist = convertToEntity(playlistDTO, userId);
 
         logger.info("Author details: id={}", playlist.getUser().getId());
 
         logger.info("OPERATION: Creating playlist with name {} by user {}",
                 playlist.getName(), playlist.getUser().getId());
-        Playlist createdPlaylist = playlistService.createPlaylist(playlist);
-        logger.info("SUCCESS: Playlist created with id {}", createdPlaylist.getId());
+        PlaylistDTO createdPlaylistDTO = playlistService.createPlaylist(playlist);
+        logger.info("SUCCESS: Playlist created with id {}", createdPlaylistDTO.getId());
 
-        return new ResponseEntity<>(createdPlaylist, HttpStatus.CREATED);
+        return new ResponseEntity<>(createdPlaylistDTO, HttpStatus.CREATED);
+    }
+
+    // Вспомогательный метод для преобразования DTO в сущность
+    private Playlist convertToEntity(PlaylistDTO playlistDTO, Long userId) {
+        Playlist playlist = new Playlist();
+        playlist.setName(playlistDTO.getName());
+        playlist.setCover(playlistDTO.getCover());
+        playlist.setPrivate(playlistDTO.isPrivate());
+
+        User user = new User();
+        user.setId(userId);
+        playlist.setUser(user);
+
+        if (playlistDTO.getPlaylistTrackList() != null) {
+            List<PlaylistTrack> playlistTracks = playlistDTO.getPlaylistTrackList().stream().map(trackDTO -> {
+                PlaylistTrack track = new PlaylistTrack();
+                track.setOrderInPlaylist(trackDTO.getOrderInPlaylist());
+                track.setAddedAt(trackDTO.getAddedAt());
+
+                Track referencedTrack = new Track();
+                referencedTrack.setId(trackDTO.getTrackId());
+                track.setTrack(referencedTrack);
+
+                Playlist referencedPlaylist = new Playlist();
+                referencedPlaylist.setId(trackDTO.getPlaylistId());
+                track.setPlaylist(referencedPlaylist);
+
+                return track;
+            }).collect(Collectors.toList());
+            playlist.setPlaylistTracks(playlistTracks);
+        }
+
+        return playlist;
     }
 
     @GetMapping("/{id}")
@@ -78,9 +113,9 @@ public class PlaylistController {
     }
 
     @GetMapping("/author/{userId}")
-    public ResponseEntity<List<PlaylistDTO>> getPlaylistsByAuthorId(@PathVariable Long userId) {
+    public ResponseEntity<List<PlaylistShortDTO>> getPlaylistsByAuthorId(@PathVariable Long userId) {
         logger.info("OPERATION: Getting playlist by author id {}", userId);
-        List<PlaylistDTO> playlists = playlistService.getAllPlaylistByAuthorId(userId);
+        List<PlaylistShortDTO> playlists = playlistService.getAllPlaylistByAuthorId(userId);
         logger.info("SUCCESS: Found playlist by author id {}", userId);
         return new ResponseEntity<>(playlists, HttpStatus.OK);
     }
