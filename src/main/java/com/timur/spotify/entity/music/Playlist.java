@@ -4,6 +4,9 @@ import com.timur.spotify.entity.auth.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 public class Playlist {
@@ -14,7 +17,11 @@ public class Playlist {
     private String name;
     private String cover;
     private boolean isPrivate;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlaylistTrack> playlistTracks = new ArrayList<>();
 }

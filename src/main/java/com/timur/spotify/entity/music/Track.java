@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -25,4 +27,7 @@ public class Track implements Serializable {
     )
     private Album album;
     private Integer duration;
+
+    @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlaylistTrack> playlistTrackList = new ArrayList<>();
 }
