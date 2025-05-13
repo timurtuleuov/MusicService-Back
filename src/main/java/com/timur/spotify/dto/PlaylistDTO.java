@@ -8,5 +8,5 @@ public class PlaylistDTO {
     private String name;
     private String cover;
     private boolean isPrivate;
-    private Long userId;
+    private String username;
 }

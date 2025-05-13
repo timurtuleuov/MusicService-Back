@@ -65,9 +65,9 @@ public class PlaylistController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Playlist> getPlaylistById(@PathVariable Long id) {
+    public ResponseEntity<PlaylistDTO> getPlaylistById(@PathVariable Long id) {
         logger.info("OPERATION: Getting playlist with id {}", id);
-        Playlist playlist = playlistService.getById(id);
+        PlaylistDTO playlist = playlistService.getById(id);
         if (playlist != null) {
             logger.info("SUCCESS: Found playlist with id {}", id);
             return new ResponseEntity<>(playlist, HttpStatus.OK);
@@ -125,26 +125,26 @@ public class PlaylistController {
             this.userService = userService;
         }
 
-        @PostMapping
-        public ResponseEntity<Void> likePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal User user) {
-            Playlist playlist = playlistService.getById(playlistId);
-            likeService.likePlaylist(user, playlist);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        }
-
-        @DeleteMapping
-        public ResponseEntity<Void> unlikePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal User user) {
-            Playlist playlist = playlistService.getById(playlistId);
-            likeService.unlikePlaylist(user, playlist);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        @GetMapping("/count")
-        public ResponseEntity<Long> getLikeCount(@PathVariable Long playlistId) {
-            Playlist playlist = playlistService.getById(playlistId);
-            long likeCount = likeService.countLikes(playlist);
-            return new ResponseEntity<>(likeCount, HttpStatus.OK);
-        }
+//        @PostMapping
+//        public ResponseEntity<Void> likePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal User user) {
+//            Playlist playlist = playlistService.getById(playlistId);
+//            likeService.likePlaylist(user, playlist);
+//            return new ResponseEntity<>(HttpStatus.CREATED);
+//        }
+//
+//        @DeleteMapping
+//        public ResponseEntity<Void> unlikePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal User user) {
+//            Playlist playlist = playlistService.getById(playlistId);
+//            likeService.unlikePlaylist(user, playlist);
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        }
+//
+//        @GetMapping("/count")
+//        public ResponseEntity<Long> getLikeCount(@PathVariable Long playlistId) {
+//            Playlist playlist = playlistService.getById(playlistId);
+//            long likeCount = likeService.countLikes(playlist);
+//            return new ResponseEntity<>(likeCount, HttpStatus.OK);
+//        }
     }
 
 }

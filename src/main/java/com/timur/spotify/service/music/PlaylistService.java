@@ -21,26 +21,28 @@ public class PlaylistService {
         return playlistRepository.save(playlist);
     }
 
-    public Playlist getById(Long id) {
+    public PlaylistDTO getById(Long id) {
         Optional<Playlist> playlist = playlistRepository.findById(id);
-        return playlist.orElse(null);
+        return playlist.map(this::convertToDTO).orElse(null);
     }
 
+    public List<PlaylistDTO> getAllPlaylistByAuthorId(Long authorId) {
+        List<Playlist> playlists = playlistRepository.findByUserId(authorId);
+        return playlists.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-
-//    Возможно, надо будет переделать для оптимизации приложения
-public List<PlaylistDTO> getAllPlaylistByAuthorId(Long authorId) {
-    List<Playlist> playlists = playlistRepository.findByUserId(authorId);
-    return playlists.stream().map(playlist -> {
+    // Вспомогательный метод для преобразования Playlist в PlaylistDTO
+    private PlaylistDTO convertToDTO(Playlist playlist) {
         PlaylistDTO dto = new PlaylistDTO();
         dto.setId(playlist.getId());
         dto.setName(playlist.getName());
         dto.setCover(playlist.getCover());
         dto.setPrivate(playlist.isPrivate());
-        dto.setUserId(playlist.getUser() != null ? playlist.getUser().getId() : null);
+        dto.setUsername(playlist.getUser() != null ? playlist.getUser().getUsername() : null);
         return dto;
-    }).collect(Collectors.toList());
-}
+    }
 
     public Playlist updatePlaylist(Long id, Playlist playlist) {
         if (playlistRepository.existsById(id)) {
