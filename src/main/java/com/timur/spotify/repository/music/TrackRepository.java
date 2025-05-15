@@ -13,4 +13,7 @@ public interface TrackRepository extends JpaRepository<Track, Long> {
     List<Track> findByAlbum_Artist_Id(Long artistId);
     List<Track> findByNameContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(String name, String artistName);
     List<Track> findByAlbum_Id(Long albumId);
+    @Query("SELECT t FROM Track t " +
+            "WHERE t.id IN :ids")
+    List<Track> findByIds(@Param("ids") List<Long> ids);
 }

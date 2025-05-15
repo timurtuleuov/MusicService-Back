@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,8 +38,8 @@ public class PlaylistController {
     @PostMapping
     public ResponseEntity<PlaylistDTO> createPlaylist(@RequestBody PlaylistDTO playlistDTO, HttpServletRequest request) {
         logger.info("OPERATION: Received request to create playlist");
-        logger.info("Playlist details: name={}, isPrivate={}, cover={}",
-                playlistDTO.getName(), playlistDTO.isPrivate(), playlistDTO.getCover());
+        logger.info("Playlist details: {}",
+                playlistDTO.getPlaylistTrackList());
 
         // Извлечение токена из заголовка
         String token = request.getHeader("Authorization");
@@ -81,15 +82,13 @@ public class PlaylistController {
             List<PlaylistTrack> playlistTracks = playlistDTO.getPlaylistTrackList().stream().map(trackDTO -> {
                 PlaylistTrack track = new PlaylistTrack();
                 track.setOrderInPlaylist(trackDTO.getOrderInPlaylist());
-                track.setAddedAt(trackDTO.getAddedAt());
+                track.setAddedAt(trackDTO.getAddedAt() != null ? trackDTO.getAddedAt() : LocalDateTime.now());
 
                 Track referencedTrack = new Track();
-                referencedTrack.setId(trackDTO.getTrackId());
+                referencedTrack.setId(trackDTO.getTrackId()); // Только ID, остальное загружается из БД
                 track.setTrack(referencedTrack);
 
-                Playlist referencedPlaylist = new Playlist();
-                referencedPlaylist.setId(trackDTO.getPlaylistId());
-                track.setPlaylist(referencedPlaylist);
+                track.setPlaylist(playlist); // Прямая ссылка
 
                 return track;
             }).collect(Collectors.toList());

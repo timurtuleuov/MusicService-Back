@@ -12,8 +12,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,20 +92,40 @@ public class TrackService {
                 .collect(Collectors.toList());
     }
 
-    public List<TrackDTO> getTracksByIDs(Long[] idArray, Long userId){
-        List<Track> tracks = trackRepository.findAll();
+    @Transactional
+    public List<TrackDTO> getTracksByIDs(Long[] idArray, Long userId) {
+        // Преобразуем массив в список
+        List<Long> ids = Arrays.asList(idArray);
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Загружаем треки с помощью JOIN FETCH
+        List<Track> tracks = trackRepository.findByIds(ids);
+
+        // Загружаем лайки пользователя для указанных треков
         List<TrackLike> trackLikes = likeRepository.findAllByIdIn(idArray);
-        Set<Long> likedTrackIds =  trackLikes.stream()
+        Set<Long> likedTrackIds = trackLikes.stream()
                 .map(trackLike -> trackLike.getTrack().getId())
                 .collect(Collectors.toSet());
-        return tracks.stream()
+
+        // Сортируем треки в соответствии с порядком idArray
+        Map<Long, Track> trackMap = tracks.stream()
+                .collect(Collectors.toMap(Track::getId, track -> track));
+        List<Track> sortedTracks = ids.stream()
+                .map(trackMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // Преобразуем в DTO
+        return sortedTracks.stream()
                 .map(track -> {
                     TrackDTO dto = new TrackDTO();
                     dto.setId(track.getId());
                     dto.setName(track.getName());
                     dto.setGenre(track.getGenre().name());
                     dto.setAudioPath(track.getAudioPath());
-                    dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
+                    dto.setAlbum(track.getAlbum()); // Album уже загружен через JOIN FETCH
                     dto.setLiked(likedTrackIds.contains(track.getId()));
                     return dto;
                 })

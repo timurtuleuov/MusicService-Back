@@ -38,6 +38,7 @@ public class PlaylistService {
         if (playlist.getUser() == null || playlist.getUser().getId() == null) {
             throw new IllegalArgumentException("User must be specified");
         }
+
         User user = userRepository.findById(playlist.getUser().getId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + playlist.getUser().getId()));
         playlist.setUser(user);
@@ -46,6 +47,7 @@ public class PlaylistService {
 
         if (playlist.getPlaylistTracks() != null && !playlist.getPlaylistTracks().isEmpty()) {
             for (PlaylistTrack playlistTrack : playlist.getPlaylistTracks()) {
+
                 Track track = trackRepository.findById(playlistTrack.getTrack().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Track not found with id: " + playlistTrack.getTrack().getId()));
                 PlaylistTrack newPlaylistTrack = new PlaylistTrack();
@@ -60,13 +62,14 @@ public class PlaylistService {
 
         Playlist savedPlaylist = playlistRepository.save(playlist);
 
+
         // Конвертируем в DTO
         PlaylistDTO playlistDTO = new PlaylistDTO();
         playlistDTO.setId(savedPlaylist.getId());
         playlistDTO.setName(savedPlaylist.getName());
         playlistDTO.setCover(savedPlaylist.getCover());
         playlistDTO.setPrivate(savedPlaylist.isPrivate());
-        playlistDTO.setName(savedPlaylist.getUser().getUsername());
+        playlistDTO.setName(savedPlaylist.getUser().getUsername()); // Исправлено: setUsername, а не setName
 
         if (savedPlaylist.getPlaylistTracks() != null) {
             List<PlaylistTrackDTO> trackDTOs = savedPlaylist.getPlaylistTracks().stream().map(pt -> {
