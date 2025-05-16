@@ -153,6 +153,7 @@ public class TrackService {
                     dto.setName(track.getName());
                     dto.setGenre(track.getGenre().name());
                     dto.setAudioPath(track.getAudioPath());
+                    dto.setDuration(track.getDuration());
                     dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
                     dto.setLiked(likedTrackIds.contains(track.getId()));
                     return dto;
@@ -176,6 +177,7 @@ public class TrackService {
                     dto.setName(track.getName());
                     dto.setGenre(track.getGenre().name());
                     dto.setAudioPath(track.getAudioPath());
+                    dto.setDuration(track.getDuration());
                     dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
                     dto.setLiked(likedTrackIds.contains(track.getId()));
                     return dto;
@@ -199,6 +201,7 @@ public class TrackService {
                     dto.setName(track.getName());
                     dto.setGenre(track.getGenre().name());
                     dto.setAudioPath(track.getAudioPath());
+                    dto.setDuration(track.getDuration());
                     dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
                     dto.setLiked(likedTrackIds.contains(track.getId()));
                     return dto;

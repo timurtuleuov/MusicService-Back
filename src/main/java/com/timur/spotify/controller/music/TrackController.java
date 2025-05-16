@@ -276,6 +276,7 @@ public class TrackController {
 
         @PostMapping
         public ResponseEntity<Void> likeTrack(@PathVariable Long trackId, @AuthenticationPrincipal User user) {
+            logger.info("OPERATION: like track {} by user {}", trackId, user.getId());
             Track track = trackService.getTrackById(trackId);
             likeService.likeTrack(user, track);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -284,6 +285,7 @@ public class TrackController {
 
         @DeleteMapping
         public ResponseEntity<Void> unlikeTrack(@PathVariable Long trackId, @AuthenticationPrincipal User user) {
+            logger.info("OPERATION: unlike track {} by user {}", trackId, user.getId());
             Track track = trackService.getTrackById(trackId);
             likeService.unlikeTrack(user, track);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
