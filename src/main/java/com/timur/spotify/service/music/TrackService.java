@@ -125,6 +125,7 @@ public class TrackService {
                     dto.setName(track.getName());
                     dto.setGenre(track.getGenre().name());
                     dto.setAudioPath(track.getAudioPath());
+                    dto.setDuration(track.getDuration());
                     dto.setAlbum(track.getAlbum()); // Album уже загружен через JOIN FETCH
                     dto.setLiked(likedTrackIds.contains(track.getId()));
                     return dto;

@@ -120,8 +120,23 @@ public class PlaylistController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Playlist> updatePlaylist(@PathVariable Long id, @RequestBody Playlist playlist) {
-        logger.info("OPERATION: Updating playlist with id {} and name {}", id, playlist.getName());
+    public ResponseEntity<Playlist> updatePlaylist(@PathVariable Long id, @RequestBody PlaylistDTO playlistDTO, HttpServletRequest request) {
+        logger.info("OPERATION: Updating playlist with id {} and name {}", id, playlistDTO.getName());
+        // Извлечение токена из заголовка
+        String token = request.getHeader("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Authorization header must contain Bearer token");
+        }
+        token = token.substring(7); // Удаляем "Bearer "
+
+        // Извлечение userId из токена
+        Long userId = jwtService.extractUserId(token);
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID not found in token");
+        }
+        Playlist playlist = convertToEntity(playlistDTO, userId);
+
+        logger.info("FULL Playlist for updating {}", playlist);
         Playlist updatedPlaylist = playlistService.updatePlaylist(id, playlist);
         if (updatedPlaylist != null) {
             logger.info("SUCCESS: Updated playlist with id {}", id);
