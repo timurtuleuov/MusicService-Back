@@ -1,11 +1,9 @@
 package com.timur.spotify.service.auth;
 
 import com.timur.spotify.entity.auth.User;
+import io.jsonwebtoken.*;
 import org.springframework.stereotype.Service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,14 +93,49 @@ public class JwtService {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
     }
 
-    public String refreshToken(String oldToken) {
-        Claims claims = extractAllClaims(oldToken);
-        String username = claims.getSubject();
-        return Jwts.builder().setClaims(claims).setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
+    private String generateToken(String subject, Map<String, Object> claims) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // например, 15 минут
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof User customUserDetails) {
+            claims.put("id", customUserDetails.getId());
+            claims.put("email", customUserDetails.getEmail());
+            claims.put("type", "refresh");
+        }
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7)) // 7 дней
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String refreshToken(String oldToken) {
+        try {
+            Claims claims = extractAllClaims(oldToken);
+            // удалим старые даты, чтобы не дублировались
+            claims.remove(Claims.EXPIRATION);
+            claims.remove(Claims.ISSUED_AT);
+            return generateToken(claims.getSubject(), claims);
+        } catch (ExpiredJwtException e) {
+            Claims claims = e.getClaims();
+            claims.remove(Claims.EXPIRATION);
+            claims.remove(Claims.ISSUED_AT);
+            return generateToken(claims.getSubject(), claims);
+        } catch (JwtException e) {
+            throw new JwtException("Invalid token: " + e.getMessage());
+        }
+    }
+
     /**
      * Проверка токена на просроченность
      *
@@ -129,8 +162,11 @@ public class JwtService {
      * @param token токен
      * @return данные
      */
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
+    public Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
                 .getBody();
     }
 

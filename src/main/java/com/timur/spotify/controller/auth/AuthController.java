@@ -6,6 +6,7 @@ import com.timur.spotify.dto.SignInRequest;
 import com.timur.spotify.dto.SignUpRequest;
 import com.timur.spotify.service.auth.AuthService;
 import com.timur.spotify.service.kafka.ProducerService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -47,15 +48,23 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public JwtAuthenticationResponse refresh(@RequestHeader("Authorization") String bearerToken) {
-        logger.info("OPERATION: REFRESH TOKEN {}", bearerToken);
+    public ResponseEntity<JwtAuthenticationResponse> refresh(String refreshToken) {
+        logger.info("OPERATION: REFRESH TOKEN {}", refreshToken);
         try {
-            return authService.refreshToken(bearerToken);
-        } catch (Exception e) {
-            logger.error("OPERATION: REFRESH TOKEN - Failed to refresh token. Error: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new JwtAuthenticationResponse()).getBody();
-        }
+            // Удаляем префикс "Bearer " (если нужно)
 
+            JwtAuthenticationResponse response = authService.refreshToken(refreshToken);
+            return ResponseEntity.ok(response);
+        } catch (JwtException e) {
+            logger.error("OPERATION: REFRESH TOKEN - Failed to refresh token. Error: {}", e.getMessage(), e);
+            JwtAuthenticationResponse errorResponse = new JwtAuthenticationResponse();
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("OPERATION: REFRESH TOKEN - Unexpected error: {}", e.getMessage(), e);
+            JwtAuthenticationResponse errorResponse = new JwtAuthenticationResponse();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 }

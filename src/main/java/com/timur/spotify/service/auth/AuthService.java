@@ -6,11 +6,14 @@ import com.timur.spotify.dto.SignInRequest;
 import com.timur.spotify.dto.SignUpRequest;
 import com.timur.spotify.entity.auth.Role;
 import com.timur.spotify.entity.auth.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +43,12 @@ public class AuthService {
 
         userService.save(user);
 
-        var jwt = jwtService.generateToken(user);
-        return new JwtAuthenticationResponse(jwt);
+        var accessToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        return JwtAuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     /**
@@ -61,16 +68,29 @@ public class AuthService {
                 .loadUserByUsername(request.getUsername());
 
         logger.info("Получаем юзера {} ", user);
-        var jwt = jwtService.generateToken(user);
-        return new JwtAuthenticationResponse(jwt);
+        var accessToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        return JwtAuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
-    public JwtAuthenticationResponse refreshToken(String bearerToken) {
+    public JwtAuthenticationResponse refreshToken(String refreshToken) {
+        Claims claims = jwtService.extractAllClaims(refreshToken);
 
-        String token = bearerToken.substring(7);
+        if (!"refresh".equals(claims.get("type"))) {
+            throw new JwtException("Not a refresh token");
+        }
 
+        String username = claims.getSubject();
+        UserDetails userDetails = userService.getByUsername(username);
 
-        var jwt = jwtService.refreshToken(token);
-        return new JwtAuthenticationResponse(jwt);
+        String newAccessToken = jwtService.generateToken(userDetails);
+        // необязательно, по желанию
+
+        return JwtAuthenticationResponse.builder()
+                .accessToken(newAccessToken)
+                .build();
     }
 }

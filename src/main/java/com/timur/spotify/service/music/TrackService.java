@@ -145,7 +145,6 @@ public class TrackService {
                 .map(trackLike -> trackLike.getTrack().getId())
                 .collect(Collectors.toSet());
 
-        // Преобразуем треки в DTO с информацией о лайках
         return tracksByArtist.stream()
                 .map(track -> {
                     TrackDTO dto = new TrackDTO();
@@ -154,7 +153,7 @@ public class TrackService {
                     dto.setGenre(track.getGenre().name());
                     dto.setAudioPath(track.getAudioPath());
                     dto.setDuration(track.getDuration());
-                    dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
+                    dto.setAlbum(track.getAlbum());
                     dto.setLiked(likedTrackIds.contains(track.getId()));
                     return dto;
                 })
@@ -178,7 +177,7 @@ public class TrackService {
                     dto.setGenre(track.getGenre().name());
                     dto.setAudioPath(track.getAudioPath());
                     dto.setDuration(track.getDuration());
-                    dto.setAlbum(track.getAlbum()); // Предполагается, что Album — это объект
+                    dto.setAlbum(track.getAlbum());
                     dto.setLiked(likedTrackIds.contains(track.getId()));
                     return dto;
                 })
@@ -193,7 +192,7 @@ public class TrackService {
                 .map(trackLike -> trackLike.getTrack().getId())
                 .collect(Collectors.toSet());
 
-        // Преобразуем треки в DTO с информацией о лайках
+
         return tracks.stream()
                 .map(track -> {
                     TrackDTO dto = new TrackDTO();
