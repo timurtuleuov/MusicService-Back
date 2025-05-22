@@ -6,6 +6,7 @@ import com.timur.spotify.dto.SignInRequest;
 import com.timur.spotify.dto.SignUpRequest;
 import com.timur.spotify.entity.auth.Role;
 import com.timur.spotify.entity.auth.User;
+import com.timur.spotify.entity.auth.UserMeta;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,13 +24,15 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserMetaService userMetaService;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    public AuthService(UserService userService, JwtService jwtService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AuthService(UserService userService, JwtService jwtService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, UserMetaService userMetaService) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.userMetaService = userMetaService;
     }
 
     public JwtAuthenticationResponse signUp(SignUpRequest request) {
@@ -42,6 +45,10 @@ public class AuthService {
                 .build();
 
         userService.save(user);
+        var userMeta = UserMeta.builder()
+                        .user(user).showProfile(true).showPlaylist(true).build();
+
+        userMetaService.save(userMeta);
 
         var accessToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);

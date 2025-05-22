@@ -32,6 +32,10 @@ public class UserMetaService {
     }
 
     @Transactional
+    public Optional<UserMeta> findByUserId(Long userId){
+        return userMetaRepository.findByUserId(userId);
+    }
+    @Transactional
     public void updateAvatar(Long userId, byte[] avatarData) {
         UserMeta meta = userMetaRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("UserMeta not found"));
@@ -41,12 +45,31 @@ public class UserMetaService {
     }
 
     @Transactional
-    public void updatePrivacySettings(Long userId, boolean showProfile, boolean showPlaylist) {
-        UserMeta meta = userMetaRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("UserMeta not found"));
+    public boolean updatePrivacy(Long userId, boolean showProfile, boolean showPlaylist) {
+        try {
+            UserMeta meta = userMetaRepository.findByUserId(userId)
+                    .orElseThrow(() -> new RuntimeException("UserMeta not found"));
 
-        meta.setShowProfile(showProfile);
-        meta.setShowPlaylist(showPlaylist);
-        userMetaRepository.save(meta);
+            meta.setShowProfile(showProfile);
+            meta.setShowPlaylist(showPlaylist);
+            userMetaRepository.save(meta);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Transactional
+    public boolean removeAvatar(Long userId) {
+        return userMetaRepository.findByUserId(userId).map(meta -> {
+            meta.setAvatar(null);
+            userMetaRepository.save(meta);
+            return true;
+        }).orElse(false);
+    }
+
+    @Transactional
+    public UserMeta save(UserMeta userMeta) {
+        return userMetaRepository.save(userMeta);
     }
 }

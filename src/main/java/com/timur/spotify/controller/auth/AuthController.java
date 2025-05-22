@@ -2,6 +2,7 @@ package com.timur.spotify.controller.auth;
 
 import com.timur.spotify.controller.music.AlbumController;
 import com.timur.spotify.dto.JwtAuthenticationResponse;
+import com.timur.spotify.dto.RefreshTokenRequest;
 import com.timur.spotify.dto.SignInRequest;
 import com.timur.spotify.dto.SignUpRequest;
 import com.timur.spotify.service.auth.AuthService;
@@ -48,12 +49,12 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<JwtAuthenticationResponse> refresh(String refreshToken) {
-        logger.info("OPERATION: REFRESH TOKEN {}", refreshToken);
+    public ResponseEntity<JwtAuthenticationResponse> refresh(@RequestBody RefreshTokenRequest refreshToken) {
+        logger.info("OPERATION: REFRESH TOKEN {}", refreshToken.getRefreshToken());
         try {
             // Удаляем префикс "Bearer " (если нужно)
 
-            JwtAuthenticationResponse response = authService.refreshToken(refreshToken);
+            JwtAuthenticationResponse response = authService.refreshToken(refreshToken.getRefreshToken());
             return ResponseEntity.ok(response);
         } catch (JwtException e) {
             logger.error("OPERATION: REFRESH TOKEN - Failed to refresh token. Error: {}", e.getMessage(), e);
