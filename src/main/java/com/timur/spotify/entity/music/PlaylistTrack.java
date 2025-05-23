@@ -5,8 +5,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Entity
+
 @Data
+@Entity
 public class PlaylistTrack {
 
     @Id

@@ -94,7 +94,7 @@ public class AuthService {
         UserDetails userDetails = userService.getByUsername(username);
 
         String newAccessToken = jwtService.generateToken(userDetails);
-        // необязательно, по желанию
+
 
         return JwtAuthenticationResponse.builder()
                 .accessToken(newAccessToken)
