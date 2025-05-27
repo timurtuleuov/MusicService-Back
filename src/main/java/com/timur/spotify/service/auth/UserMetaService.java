@@ -36,12 +36,13 @@ public class UserMetaService {
         return userMetaRepository.findByUserId(userId);
     }
     @Transactional
-    public void updateAvatar(Long userId, byte[] avatarData) {
+    public String updateAvatar(Long userId, byte[] avatarData) {
         UserMeta meta = userMetaRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("UserMeta not found"));
 
         meta.setAvatar(avatarData);
         userMetaRepository.save(meta);
+        return null;
     }
 
     @Transactional
@@ -72,4 +73,5 @@ public class UserMetaService {
     public UserMeta save(UserMeta userMeta) {
         return userMetaRepository.save(userMeta);
     }
+
 }
