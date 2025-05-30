@@ -8,6 +8,7 @@ import com.timur.spotify.repository.music.TrackFeedRepository;
 import com.timur.spotify.repository.music.TrackLikeRepository;
 import com.timur.spotify.repository.music.TrackRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class TrackFeedService {
                 .map(this::mapToDTOWithoutLikes)
                 .collect(Collectors.toList());
     }
-
+    @Transactional
     public List<TrackFeedDTO> getAllFeedsForUser(Long userId) {
         Set<Long> likedTrackIds = likeRepository.findByUserId(userId).stream()
                 .map(trackLike -> trackLike.getTrack().getId())
@@ -39,7 +40,7 @@ public class TrackFeedService {
                 .map(feed -> mapToDTO(feed, likedTrackIds))
                 .collect(Collectors.toList());
     }
-
+    @Transactional
     public Optional<TrackFeedDTO> getFeedById(Long id) {
         return trackFeedRepository.findById(id)
                 .map(this::mapToDTOWithoutLikes);

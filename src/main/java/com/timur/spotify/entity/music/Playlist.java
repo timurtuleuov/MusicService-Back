@@ -1,5 +1,6 @@
 package com.timur.spotify.entity.music;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.timur.spotify.entity.auth.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class Playlist {
     private boolean isPrivate;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

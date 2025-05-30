@@ -3,6 +3,8 @@ package com.timur.spotify.controller.music;
 import com.timur.spotify.dto.TrackFeedDTO;
 import com.timur.spotify.service.music.TrackFeedService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +15,7 @@ import java.util.List;
 @RequestMapping("/track-feeds")
 @RequiredArgsConstructor
 public class TrackFeedController {
-
+    private static final Logger logger = LoggerFactory.getLogger(AlbumController.class);
     private final TrackFeedService trackFeedService;
 
     // Получить все фиды (без учёта лайков)
@@ -26,6 +28,7 @@ public class TrackFeedController {
     // Получить все фиды с лайками для пользователя
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TrackFeedDTO>> getFeedsForUser(@PathVariable Long userId) {
+        logger.info("OPERATION: Getting trackFeeds for user  {}", userId);
         List<TrackFeedDTO> feeds = trackFeedService.getAllFeedsForUser(userId);
         return ResponseEntity.ok(feeds);
     }
