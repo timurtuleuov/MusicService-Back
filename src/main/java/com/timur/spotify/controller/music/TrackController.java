@@ -10,6 +10,7 @@ import com.timur.spotify.service.music.AlbumService;
 import com.timur.spotify.service.music.FileStorageService;
 import com.timur.spotify.service.music.TrackLikeService;
 import com.timur.spotify.service.music.TrackService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -23,6 +24,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.http.ResponseEntity;
@@ -34,10 +36,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
@@ -98,10 +97,10 @@ public class TrackController {
     @GetMapping("/audio/{fileName:.+}")
     public ResponseEntity<ByteArrayResource> getAudioFile(@PathVariable String fileName) throws IOException {
         logger.info("OPERATION: Getting audio of track by name {}", fileName);
-//        File file = new File("E:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
-        File file = new File("D:\\MusicService-Back\\src\\main\\resources\\static\\" + fileName);
+
+        File file = new File("E:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
         if (!file.exists()) {
-            logger.error("FAIL: Audio file with name {} doens't exist", fileName);
+            logger.error("FAIL: Audio file with name {} doesn't exist", fileName);
             return ResponseEntity.notFound().build();
         }
 
@@ -111,22 +110,26 @@ public class TrackController {
         headers.setContentDisposition(ContentDisposition.builder("inline").filename(fileName).build());
         headers.set("Accept-Ranges", "bytes");
 
-        if (headers.containsKey(HttpHeaders.RANGE)) {
-            String rangeHeader = headers.getFirst(HttpHeaders.RANGE);
+        // Проверка Range-заголовка (приходит от клиента, например, браузера)
+        String rangeHeader = RequestContextHolder.currentRequestAttributes()
+                .getAttribute("org.springframework.web.context.request.ServletRequestAttributes.REQUEST", 0)
+                instanceof HttpServletRequest req
+                ? req.getHeader(HttpHeaders.RANGE)
+                : null;
+
+        if (rangeHeader != null) {
             long rangeStart = 0;
             long rangeEnd = fileLength - 1;
 
-            if (rangeHeader != null) {
-                String[] ranges = rangeHeader.replace("bytes=", "").split("-");
-                try {
-                    rangeStart = Long.parseLong(ranges[0]);
-                    if (ranges.length > 1) {
-                        rangeEnd = Long.parseLong(ranges[1]);
-                    }
-                } catch (NumberFormatException e) {
-                    logger.error("FAIL: Failed to parse range header for file {}. Bad request format: {}", fileName, rangeHeader);
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            String[] ranges = rangeHeader.replace("bytes=", "").split("-");
+            try {
+                rangeStart = Long.parseLong(ranges[0]);
+                if (ranges.length > 1 && !ranges[1].isEmpty()) {
+                    rangeEnd = Long.parseLong(ranges[1]);
                 }
+            } catch (NumberFormatException e) {
+                logger.error("FAIL: Failed to parse range header for file {}. Bad request format: {}", fileName, rangeHeader);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
 
             if (rangeStart > rangeEnd || rangeEnd >= fileLength) {
@@ -142,15 +145,17 @@ public class TrackController {
             headers.set(HttpHeaders.CONTENT_RANGE, "bytes " + rangeStart + "-" + rangeEnd + "/" + fileLength);
 
             byte[] data = new byte[(int) contentLength];
-            try (InputStream inputStream = new FileInputStream(file)) {
-                inputStream.skip(rangeStart);
-
+            try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+                raf.seek(rangeStart);
+                raf.readFully(data);
             }
+
             logger.info("SUCCESS: Successfully processed partial content request for file {}", fileName);
             return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                     .headers(headers)
                     .body(new ByteArrayResource(data));
         } else {
+            // Полный файл
             byte[] data = Files.readAllBytes(file.toPath());
             headers.setContentLength(fileLength);
 
@@ -160,6 +165,7 @@ public class TrackController {
                     .body(new ByteArrayResource(data));
         }
     }
+
     // Получение трека по ID
     @GetMapping("/{id}")
     public ResponseEntity<Track> getTrackById(@PathVariable Long id) {
