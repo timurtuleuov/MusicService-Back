@@ -98,7 +98,8 @@ public class TrackController {
     public ResponseEntity<ByteArrayResource> getAudioFile(@PathVariable String fileName) throws IOException {
         logger.info("OPERATION: Getting audio of track by name {}", fileName);
 
-        File file = new File("E:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
+//        File file = new File("E:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
+        File file = new File("src/main/resources/static/" + fileName);
         if (!file.exists()) {
             logger.error("FAIL: Audio file with name {} doesn't exist", fileName);
             return ResponseEntity.notFound().build();
