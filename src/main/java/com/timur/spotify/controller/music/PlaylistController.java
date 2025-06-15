@@ -8,18 +8,26 @@ import com.timur.spotify.entity.music.PlaylistTrack;
 import com.timur.spotify.entity.music.Track;
 import com.timur.spotify.service.auth.JwtService;
 import com.timur.spotify.service.auth.UserService;
+import com.timur.spotify.service.music.FileStorageService;
 import com.timur.spotify.service.music.PlaylistLikeService;
 import com.timur.spotify.service.music.PlaylistService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,43 +37,46 @@ public class PlaylistController {
 
     private final PlaylistService playlistService;
     private final JwtService jwtService;
+    private final FileStorageService fileStorageService;
 
-    public PlaylistController(PlaylistService playlistService, JwtService jwtService) {
+    public PlaylistController(PlaylistService playlistService, JwtService jwtService, FileStorageService fileStorageService) {
         this.playlistService = playlistService;
         this.jwtService = jwtService;
+        this.fileStorageService = fileStorageService;
     }
 
-    @PostMapping
-    public ResponseEntity<PlaylistDTO> createPlaylist(@RequestBody PlaylistDTO playlistDTO, HttpServletRequest request) {
-        logger.info("OPERATION: Received request to create playlist");
-        logger.info("Playlist details: {}",
-                playlistDTO.getPlaylistTrackList());
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PlaylistDTO> createPlaylist(
+            @RequestPart("playlist") PlaylistDTO playlistDTO,
+            @RequestPart(value = "cover", required = false) MultipartFile cover,
+            HttpServletRequest request) throws IOException {
 
-        // Извлечение токена из заголовка
+        logger.info("OPERATION: Creating playlist with name {}", playlistDTO.getName());
+
         String token = request.getHeader("Authorization");
         if (token == null || !token.startsWith("Bearer ")) {
             throw new IllegalArgumentException("Authorization header must contain Bearer token");
         }
-        token = token.substring(7); // Удаляем "Bearer "
+        token = token.substring(7);
 
-        // Извлечение userId из токена
         Long userId = jwtService.extractUserId(token);
         if (userId == null) {
             throw new IllegalArgumentException("User ID not found in token");
         }
 
-        // Преобразование DTO в сущность Playlist для сохранения
+        // обработка cover, например, сохранить файл и получить URL
+        String coverUrl = null;
+        if (cover != null && !cover.isEmpty()) {
+            coverUrl = fileStorageService.savePlaylistCover(cover); // реализуй fileStorageService
+        }
+
         Playlist playlist = convertToEntity(playlistDTO, userId);
+        playlist.setCover(coverUrl);
 
-        logger.info("Author details: id={}", playlist.getUser().getId());
-
-        logger.info("OPERATION: Creating playlist with name {} by user {}",
-                playlist.getName(), playlist.getUser().getId());
-        PlaylistDTO createdPlaylistDTO = playlistService.createPlaylist(playlist);
-        logger.info("SUCCESS: Playlist created with id {}", createdPlaylistDTO.getId());
-
-        return new ResponseEntity<>(createdPlaylistDTO, HttpStatus.CREATED);
+        PlaylistDTO created = playlistService.createPlaylist(playlist);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
+
 
     // Вспомогательный метод для преобразования DTO в сущность
     private Playlist convertToEntity(PlaylistDTO playlistDTO, Long userId) {

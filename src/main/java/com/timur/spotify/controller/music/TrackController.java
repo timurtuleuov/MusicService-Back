@@ -38,6 +38,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -97,8 +99,8 @@ public class TrackController {
     @GetMapping("/audio/{fileName:.+}")
     public ResponseEntity<ByteArrayResource> getAudioFile(@PathVariable String fileName) throws IOException {
         logger.info("OPERATION: Getting audio of track by name {}", fileName);
-
-        File file = new File("E:\\IT\\1SpotifyClone\\spotify\\src\\main\\resources\\static\\" + fileName);
+        Path path = Paths.get("src/main/resources/static/" + fileName);
+        File file = path.toFile();
         if (!file.exists()) {
             logger.error("FAIL: Audio file with name {} doesn't exist", fileName);
             return ResponseEntity.notFound().build();

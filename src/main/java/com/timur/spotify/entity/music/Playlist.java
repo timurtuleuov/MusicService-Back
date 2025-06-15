@@ -1,6 +1,7 @@
 package com.timur.spotify.entity.music;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.timur.spotify.entity.auth.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -27,5 +28,6 @@ public class Playlist {
     private User user;
 
     @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<PlaylistTrack> playlistTracks = new ArrayList<>();
 }

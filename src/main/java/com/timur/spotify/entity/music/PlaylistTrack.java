@@ -1,5 +1,6 @@
 package com.timur.spotify.entity.music;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ public class PlaylistTrack {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "playlist_id", nullable = false)
+    @JsonBackReference
     private Playlist playlist;
 
     @ManyToOne(fetch = FetchType.LAZY)
