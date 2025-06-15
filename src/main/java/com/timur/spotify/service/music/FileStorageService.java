@@ -17,23 +17,16 @@ public class FileStorageService {
     private static final String COVER_FOLDER = "covers/";
 
     public String savePlaylistCover(MultipartFile file) throws IOException {
-        // Уникальное имя файла
-        String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
+        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
-        // Путь к папке static/covers/
-        Path uploadPath = Paths.get(STATIC_PATH + COVER_FOLDER);
-
-        // Создаём директорию, если не существует
+        Path uploadPath = Paths.get("covers"); // относительный путь в файловой системе
         Files.createDirectories(uploadPath);
 
-        // Полный путь к файлу
         Path filePath = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath);
 
-        // Сохраняем файл (перезаписываем, если уже есть)
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        // Возвращаем относительный путь, который можно использовать как URL
-        return "/static/" + COVER_FOLDER + fileName;
+        // Возвращай URL для доступа через браузер
+        return "/covers/" + fileName;
     }
 
     public String saveFile(MultipartFile file) throws IOException {
