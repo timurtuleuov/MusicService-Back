@@ -4,10 +4,13 @@ import com.timur.spotify.entity.auth.User;
 import com.timur.spotify.entity.auth.UserMeta;
 import com.timur.spotify.repository.auth.UserMetaRepository;
 import com.timur.spotify.repository.auth.UserRepository;
+import com.timur.spotify.service.music.FileStorageService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -16,6 +19,7 @@ public class UserMetaService {
 
     private final UserMetaRepository userMetaRepository;
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
 
     public Optional<UserMeta> getByUserId(Long userId) {
         return userMetaRepository.findByUserId(userId);
@@ -35,16 +39,18 @@ public class UserMetaService {
     public Optional<UserMeta> findByUserId(Long userId){
         return userMetaRepository.findByUserId(userId);
     }
+
     @Transactional
-    public String updateAvatar(Long userId, byte[] avatarData) {
+    public String updateAvatar(Long userId, MultipartFile avatarFile) throws IOException {
         UserMeta meta = userMetaRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("UserMeta not found"));
 
-        meta.setAvatar(avatarData);
+        String avatarUrl = fileStorageService.saveUserAvatar(avatarFile); // "/avatars/uuid-filename.jpg"
+        meta.setAvatar(avatarUrl);
         userMetaRepository.save(meta);
-        return null;
-    }
 
+        return avatarUrl;
+    }
     @Transactional
     public boolean updatePrivacy(Long userId, boolean showProfile, boolean showPlaylist) {
         try {

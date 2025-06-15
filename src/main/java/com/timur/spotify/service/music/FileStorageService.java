@@ -29,6 +29,19 @@ public class FileStorageService {
         return "/covers/" + fileName;
     }
 
+    public String saveUserAvatar(MultipartFile file) throws IOException {
+        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+
+        Path uploadPath = Paths.get("avatars"); // относительный путь в файловой системе
+        Files.createDirectories(uploadPath);
+
+        Path filePath = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath);
+
+        // Возвращай URL для доступа через браузер
+        return "/avatars/" + fileName;
+    }
+
     public String saveFile(MultipartFile file) throws IOException {
         String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
 

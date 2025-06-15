@@ -11,5 +11,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry
                 .addResourceHandler("/covers/**")
                 .addResourceLocations("file:./covers/"); // относительный путь рядом с jar'ом
+
+        registry
+                .addResourceHandler("/avatars/**") // <--- для аватаров
+                .addResourceLocations("file:./avatars/");
     }
 }

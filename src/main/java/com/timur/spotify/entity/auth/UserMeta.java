@@ -15,8 +15,8 @@ public class UserMeta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Lob
-    private byte[] avatar;
+
+    private String avatar;
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;

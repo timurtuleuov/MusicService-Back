@@ -141,6 +141,7 @@ public class PlaylistService {
         dto.setUsername(playlist.getUser() != null ? playlist.getUser().getUsername() : null);
         return dto;
     }
+    @Transactional
     public Playlist updatePlaylist(Long id, Playlist playlist) {
         if (playlistRepository.existsById(id)) {
             playlist.setId(id);

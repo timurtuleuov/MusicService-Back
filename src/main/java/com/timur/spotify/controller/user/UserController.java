@@ -43,8 +43,8 @@ public class UserController {
         dto.setUsername(user.getUser().getUsername());
         dto.setEmail(user.getUser().getEmail());
         if (user.getAvatar() != null) {
-            String base64Avatar = java.util.Base64.getEncoder().encodeToString(user.getAvatar());
-            dto.setAvatar((base64Avatar));
+
+            dto.setAvatar((user.getAvatar()));
         } else {
             dto.setAvatar(null);
         }
@@ -70,7 +70,7 @@ public class UserController {
         UserMeta userMeta = existingMetaOpt.orElseGet(UserMeta::new);
 
         userMeta.setUser(userOpt);
-        userMeta.setAvatar(dto.getAvatar().getBytes());
+        userMeta.setAvatar(dto.getAvatar());
         userMeta.setShowProfile(dto.isShowProfile());
         userMeta.setShowPlaylist(dto.isShowPlaylist());
 
@@ -79,7 +79,7 @@ public class UserController {
 
         UserMetaDTO savedDto = new UserMetaDTO();
         savedDto.setId(savedMeta.getId());
-        savedDto.setAvatar(Arrays.toString(savedMeta.getAvatar()));
+        savedDto.setAvatar(savedMeta.getAvatar());
         savedDto.setShowProfile(savedMeta.isShowProfile());
         savedDto.setShowPlaylist(savedMeta.isShowPlaylist());
 
@@ -105,35 +105,15 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{userId}/avatar")
-    public ResponseEntity<String> uploadAvatar(@PathVariable Long userId,
-                                               @RequestParam MultipartFile file) {
-        logger.info("Загрузка аватара для пользователя {}", userId);
-
-        try {
-            if (file.isEmpty()) {
-                logger.error("Пустой файл для пользователя {}", userId);
-                return ResponseEntity.badRequest().body("Файл пустой");
-            }
-
-            String contentType = file.getContentType();
-            if (!"image/jpeg".equals(contentType) && !"image/png".equals(contentType)) {
-                logger.error("Недопустимый формат файла: {}", contentType);
-                return ResponseEntity.badRequest().body("Допустимы только JPEG и PNG изображения");
-            }
-            Optional<UserMeta> existingMetaOpt = userMetaService.findByUserId(userId);
-            UserMeta userMeta = existingMetaOpt.orElseGet(UserMeta::new);
-            byte[] avatarBytes = file.getBytes();
-
-            userMeta.setAvatar(avatarBytes);
-            userMetaService.save(userMeta);
-            logger.info("Аватар успешно обновлён для пользователя {}", userId);
-            return ResponseEntity.ok("data:" + contentType + ";base64,"  );
-        } catch (IOException e) {
-            logger.error("Ошибка при загрузке аватара: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при сохранении файла");
-        }
+    @PostMapping("/users/{id}/avatar")
+    public ResponseEntity<String> uploadAvatar(
+            @PathVariable Long id,
+            @RequestPart("avatar") MultipartFile avatar
+    ) throws IOException {
+        String avatarUrl = userMetaService.updateAvatar(id, avatar);
+        return ResponseEntity.ok(avatarUrl);
     }
+
     @DeleteMapping("/{userId}/avatar")
     public ResponseEntity<Void> deleteAvatar(@PathVariable Long userId) {
         logger.info("Удаление аватара пользователя {}", userId);

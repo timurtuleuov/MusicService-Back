@@ -130,8 +130,13 @@ public class PlaylistController {
         return new ResponseEntity<>(playlists, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Playlist> updatePlaylist(@PathVariable Long id, @RequestBody PlaylistDTO playlistDTO, HttpServletRequest request) {
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Playlist> updatePlaylist(
+            @PathVariable Long id,
+            @RequestPart("playlist") PlaylistDTO playlistDTO,
+            @RequestPart(value = "cover", required = false) MultipartFile cover,
+            HttpServletRequest request
+    ) throws IOException {
         logger.info("OPERATION: Updating playlist with id {} and name {}", id, playlistDTO.getName());
         // Извлечение токена из заголовка
         String token = request.getHeader("Authorization");
@@ -145,7 +150,13 @@ public class PlaylistController {
         if (userId == null) {
             throw new IllegalArgumentException("User ID not found in token");
         }
+
+        String coverUrl = null;
+        if (cover != null && !cover.isEmpty()) {
+            coverUrl = fileStorageService.savePlaylistCover(cover); // реализуй fileStorageService
+        }
         Playlist playlist = convertToEntity(playlistDTO, userId);
+        playlist.setCover(coverUrl);
 
         logger.info("FULL Playlist for updating {}", playlist);
         Playlist updatedPlaylist = playlistService.updatePlaylist(id, playlist);
