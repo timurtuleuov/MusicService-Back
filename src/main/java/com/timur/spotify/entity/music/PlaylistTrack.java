@@ -21,6 +21,7 @@ public class PlaylistTrack {
     private Playlist playlist;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "track_id", nullable = false)
     private Track track;
 

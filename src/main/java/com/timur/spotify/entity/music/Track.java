@@ -1,6 +1,7 @@
 package com.timur.spotify.entity.music;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -36,5 +37,6 @@ public class Track implements Serializable {
     private Integer duration;
 
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<PlaylistTrack> playlistTracks = new ArrayList<>();
 }

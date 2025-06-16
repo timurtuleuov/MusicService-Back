@@ -138,25 +138,32 @@ public class PlaylistController {
             HttpServletRequest request
     ) throws IOException {
         logger.info("OPERATION: Updating playlist with id {} and name {}", id, playlistDTO.getName());
-        // Извлечение токена из заголовка
+
         String token = request.getHeader("Authorization");
         if (token == null || !token.startsWith("Bearer ")) {
             throw new IllegalArgumentException("Authorization header must contain Bearer token");
         }
-        token = token.substring(7); // Удаляем "Bearer "
-
-        // Извлечение userId из токена
+        token = token.substring(7);
         Long userId = jwtService.extractUserId(token);
         if (userId == null) {
             throw new IllegalArgumentException("User ID not found in token");
         }
 
-        String coverUrl = null;
-        if (cover != null && !cover.isEmpty()) {
-            coverUrl = fileStorageService.savePlaylistCover(cover); // реализуй fileStorageService
+        // 💡 Получаем текущий плейлист
+        PlaylistDTO existingPlaylist = playlistService.getById(id);
+        if (existingPlaylist == null) {
+            logger.warn("Playlist with id {} not found", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        // 💡 Сохраняем новую обложку, если есть, иначе оставляем старую
+        String coverUrl = existingPlaylist.getCover(); // текущая обложка
+        if (cover != null && !cover.isEmpty()) {
+            coverUrl = fileStorageService.savePlaylistCover(cover); // новая обложка
+        }
+
         Playlist playlist = convertToEntity(playlistDTO, userId);
-        playlist.setCover(coverUrl);
+        playlist.setCover(coverUrl); // устанавливаем либо старую, либо новую обложку
 
         logger.info("FULL Playlist for updating {}", playlist);
         Playlist updatedPlaylist = playlistService.updatePlaylist(id, playlist);
@@ -168,6 +175,7 @@ public class PlaylistController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
